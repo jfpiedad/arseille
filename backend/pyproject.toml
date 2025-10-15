@@ -23,7 +23,6 @@ dev = [
     "ruff>=0.13.3",
 ]
 
-
 [tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
