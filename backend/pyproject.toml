@@ -6,12 +6,13 @@ readme = "README.md"
 authors = [
     { name = "jfpiedad", email = "jfpiedad@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "albumentations>=2.0.8",
     "cachetools>=6.2.1",
     "fastapi[standard-no-fastapi-cloud-cli]>=0.118.0",
     "matplotlib>=3.10.7",
+    "mediapipe>=0.10.21",
     "pandas>=2.3.3",
     "pydantic-settings>=2.11.0",
     "pymongo>=4.15.3",
