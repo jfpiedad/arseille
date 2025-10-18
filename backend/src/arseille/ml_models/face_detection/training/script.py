@@ -18,10 +18,10 @@ def training(
     batch_size: int = 256,
     image_size: int = 128,
     epochs: int = 10,
-    dataset_directory: str | None = None,
+    dataset_directory: Path | None = None,
     learning_rate: float = 0.001,
     patience: float = 10,
-    weights_path: str | None = None,
+    weights_path: Path | None = None,
     shuffle: bool = True,
     test: bool = False,
 ) -> None:

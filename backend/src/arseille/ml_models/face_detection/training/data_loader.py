@@ -14,6 +14,8 @@ from arseille.ml_models.face_detection.utils import od_collate_fn
 
 
 class OpenImagesV7Dataset(Dataset):
+    dataset_filenames: list[str]
+
     def __init__(
         self,
         directory: str | Path,
@@ -38,7 +40,7 @@ class OpenImagesV7Dataset(Dataset):
         self.image_size = image_size
         self.transform = transform
         self.augment = augment
-        self.dataset_filenames: list[str] = self._get_filenames()
+        self.dataset_filenames = self._get_filenames()
 
     def __len__(self) -> int:
         return len(self.dataset_filenames)
