@@ -6,8 +6,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from ml_models.face_detection.blazeface import BlazeFace
-from ml_models.face_detection.utils import MultiBoxLoss
+from arseille.ml_models.face_detection.blazeface import BlazeFace
+from arseille.ml_models.face_detection.utils import MultiBoxLoss
 
 
 def train_model(
@@ -77,12 +77,12 @@ def train_model(
 
         validation_loss = validation_loss / validation_data_length
 
-        print(
-            f"[{epoch + 1}] Training loss: {training_loss:.3f} | Validation loss: {validation_loss:.3f}"
-        )
-        print(
-            f"Training localization loss: {training_localization_loss:.3f} | Training class loss: {training_class_loss:.3f}"
-        )
+        print(f"[{epoch + 1}]: ")
+
+        print(f"Training loss: {training_loss:.3f}")
+        print(f"Validation loss: {validation_loss:.3f}")
+        print(f"Training localization loss: {training_localization_loss:.3f}")
+        print(f"Training class loss: {training_class_loss:.3f}")
 
         scheduler.step(validation_loss)
 

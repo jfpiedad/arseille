@@ -5,10 +5,10 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from typer import Typer
 
-from ml_models.face_detection.blazeface import BlazeFace
-from ml_models.face_detection.training.data_loader import get_dataloader
-from ml_models.face_detection.training.trainer import train_model
-from ml_models.face_detection.utils import MultiBoxLoss
+from arseille.ml_models.face_detection.blazeface import BlazeFace
+from arseille.ml_models.face_detection.training.data_loader import get_dataloader
+from arseille.ml_models.face_detection.training.trainer import train_model
+from arseille.ml_models.face_detection.utils import MultiBoxLoss
 
 cli = Typer(name="Train face detection model", pretty_exceptions_enable=False)
 
@@ -27,7 +27,7 @@ def training(
 ) -> None:
     """Train face detection model."""
 
-    root_directory = Path(__file__).resolve().parents[4]
+    root_directory = Path(__file__).resolve().parents[6]
 
     if dataset_directory is None:
         dataset_directory = (

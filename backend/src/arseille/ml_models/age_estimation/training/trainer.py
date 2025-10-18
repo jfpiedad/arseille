@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from ml_models.age_estimation.agenet import AgeEstimationModel, AgeRangeModel
+from arseille.ml_models.age_estimation.agenet import AgeEstimationModel, AgeRangeModel
 
 
 def evaluate(
@@ -180,9 +180,9 @@ def train_model(
         history["train_age_range_loss"].append(float(train_age_range_loss))
         history["train_age_range_accuracy"].append(float(train_age_range_accuracy))
 
-        print(
-            f"Training age range loss: {train_age_range_loss: .2f}, Training age range accuracy: {train_age_range_accuracy: .2f}, Training age estimation loss: {train_age_estimation_loss: .2f}"
-        )
+        print(f"Training age range loss: {train_age_range_loss:.2f}")
+        print(f"Training age range accuracy: {train_age_range_accuracy:.2f}")
+        print(f"Training age estimation loss: {train_age_estimation_loss:.2f}")
 
         if validation_data:
             (
@@ -206,8 +206,10 @@ def train_model(
             age_range_scheduler.step(np.round(validation_age_range_loss, 3))
             age_estimation_scheduler.step(np.round(validation_age_estimation_loss, 3))
 
+            print(f"Validation age range loss: {validation_age_range_loss:.2f}")
+            print(f"Validation age range accuracy: {validation_age_range_accuracy:.2f}")
             print(
-                f"Validation age range loss: {validation_age_range_loss: .2f}, Validation age range accuracy: {validation_age_range_accuracy: .2f}, Validation age estimation loss: {validation_age_estimation_loss: .2f}"
+                f"Validation age estimation loss: {validation_age_estimation_loss:.2f}"
             )
 
     if weights_path:

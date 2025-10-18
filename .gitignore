@@ -1,2 +1,5 @@
 # Environmental Variables
 *.env
+
+# ML models weights
+weights/

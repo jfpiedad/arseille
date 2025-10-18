@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
 
-from ml_models.face_detection.utils import od_collate_fn
+from arseille.ml_models.face_detection.utils import od_collate_fn
 
 
 class OpenImagesV7Dataset(Dataset):
@@ -115,7 +115,9 @@ class OpenImagesV7Dataset(Dataset):
 
     @staticmethod
     def _resize_and_pad(image: np.ndarray, target_size: int = 128) -> dict[str, Any]:
-        """Resize image to square `target_size`, and pad if needed to avoid deformation."""
+        """
+        Resize image to square `target_size`, and pad if needed to avoid deformation.
+        """
 
         if image.shape[0] > image.shape[1]:
             new_y = target_size
