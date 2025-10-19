@@ -1,4 +1,6 @@
-from pydantic import HttpUrl
+from pathlib import Path
+
+from pydantic import HttpUrl, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +12,11 @@ class Settings(BaseSettings):
 
     WEATHER_API_KEY: str
     WEATHER_API_BASE_URL: HttpUrl
+
+    @computed_field
+    @property
+    def ROOT_DIRECTORY(self) -> Path:
+        return Path(__file__).resolve().parents[3]
 
 
 settings = Settings()

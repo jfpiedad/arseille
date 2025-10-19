@@ -2,6 +2,7 @@ from pathlib import Path
 
 from typer import Typer
 
+from arseille.config import settings
 from arseille.ml_models.age_estimation.training.data_loader import (
     get_dataloader,
     split_dataloader,
@@ -27,7 +28,7 @@ def training(
 ) -> None:
     """Train age estimation model."""
 
-    root_directory = Path(__file__).resolve().parents[6]
+    root_directory = settings.ROOT_DIRECTORY
     dataset_directory = root_directory / "datasets" / "age_estimation"
 
     if training_data_directory is None:

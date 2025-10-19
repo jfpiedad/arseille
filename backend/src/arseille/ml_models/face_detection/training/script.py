@@ -5,6 +5,7 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from typer import Typer
 
+from arseille.config import settings
 from arseille.ml_models.face_detection.blazeface import BlazeFace
 from arseille.ml_models.face_detection.training.data_loader import get_dataloader
 from arseille.ml_models.face_detection.training.trainer import train_model
@@ -27,7 +28,7 @@ def training(
 ) -> None:
     """Train face detection model."""
 
-    root_directory = Path(__file__).resolve().parents[6]
+    root_directory = settings.ROOT_DIRECTORY
 
     if dataset_directory is None:
         dataset_directory = (
