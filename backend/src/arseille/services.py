@@ -17,6 +17,7 @@ def get_current_weather() -> Weather:
         "key": settings.WEATHER_API_KEY,
     }
 
+    # Use this temperature value incase the API fails.
     temperature = 25
 
     try:

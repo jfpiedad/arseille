@@ -4,11 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
-from arseille.database import initialize_db
+from arseille.lifespan import lifespan
 
-app = FastAPI(
-    lifespan=initialize_db, swagger_ui_parameters={"operationsSorter": "method"}
-)
+app = FastAPI(lifespan=lifespan, swagger_ui_parameters={"operationsSorter": "method"})
 
 
 app.add_middleware(

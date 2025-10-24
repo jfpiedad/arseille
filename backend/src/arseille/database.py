@@ -1,15 +1,10 @@
-from contextlib import asynccontextmanager
-from typing import Any
-
-from fastapi import FastAPI
 from pymongo import AsyncMongoClient
 from pymongo.server_api import ServerApi
 
 from arseille.config import settings
 
 
-@asynccontextmanager
-async def initialize_db(app: FastAPI) -> Any:
+async def initialize_db() -> AsyncMongoClient:
     client = AsyncMongoClient(
         host=settings.DB_CONNECTION_STRING,
         server_api=ServerApi(version="1", strict=True, deprecation_errors=True),
@@ -23,8 +18,4 @@ async def initialize_db(app: FastAPI) -> Any:
             f"Cannot connect to the database.\nThe following error occured: {exc}"
         )
 
-    database = client[settings.DB_NAME]
-
-    yield {"db": database}
-
-    await client.close()
+    return client
