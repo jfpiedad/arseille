@@ -9,13 +9,13 @@ from arseille.database import initialize_db
 from arseille.system.vending_machine import VendingMachine
 
 
-class LifespanDict(TypedDict):
+class LifespanState(TypedDict):
     database: AsyncDatabase
     vending_machine: VendingMachine
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanDict, None]:
+async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanState, None]:
     # Initialize database connection.
     client = await initialize_db()
     database = client[settings.DB_NAME]
