@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OpenCV Stream</title>
+  </head>
+  <body>
+    <h1>OpenCV WebSocket Stream</h1>
+    <img id="video-stream" width="640" height="480" />
+    <p id="age"></p>
+    <p id="weather"></p>
+
+    <script>
+      const imageElement = document.getElementById("video-stream");
+      const ageDisplay = document.getElementById("age");
+      const weatherDisplay = document.getElementById("weather");
+      const ws = new WebSocket("/ws/checkpoint/1");
+
+      ws.binaryType = "arraybuffer";
+      let currentImageUrl = null;
+      let processing = false;
+
+      ws.addEventListener("open", () => {
+        console.log("WebSocket connected.");
+      });
+
+      ws.addEventListener("close", (event) => {
+        console.log("WebSocket disconnected", event);
+        console.log("Code:", event.code);
+        console.log("Reason:", event.reason);
+        console.log("WasClean:", event.wasClean);
+      });
+
+      ws.addEventListener("error", (error) => {
+        console.error(`WebSocket error: ${error}`);
+      });
+
+      ws.addEventListener("message", (event) => {
+        if (processing) {
+          console.log("Still processing previous frame.");
+          return;
+        }
+
+        processing = true;
+
+        const buffer = event.data;
+
+        try {
+          const view = new DataView(buffer);
+          const metadataLength = view.getUint32(0, true);
+
+          const metadataStart = 4;
+          const metadataEnd = metadataStart + metadataLength;
+
+          const metadataBytes = buffer.slice(metadataStart, metadataEnd);
+          const metadataString = new TextDecoder("utf-8").decode(metadataBytes);
+          const metaData = JSON.parse(metadataString);
+
+          ageDisplay.innerText = metaData.age;
+          weatherDisplay.innerText = metaData.weather;
+
+          const imageStart = metadataEnd;
+
+          const imageBytes = buffer.slice(imageStart);
+          const imageBlob = new Blob([imageBytes], { type: "image/jpeg" });
+
+          const newImageUrl = URL.createObjectURL(imageBlob);
+
+          imageElement.src = newImageUrl;
+
+          if (currentImageUrl) {
+            URL.revokeObjectURL(currentImageUrl);
+          }
+
+          currentImageUrl = newImageUrl;
+        } catch (error) {
+          console.error(`Error parsing binary message: ${error}`);
+        } finally {
+          processing = false;
+        }
+      });
+    </script>
+  </body>
+</html>

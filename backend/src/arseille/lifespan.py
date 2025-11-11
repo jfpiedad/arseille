@@ -6,7 +6,7 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from arseille.config import settings
 from arseille.database import initialize_db
-from arseille.system.vending_machine import VendingMachine
+from arseille.vending.vending_machine import VendingMachine
 
 
 class LifespanState(TypedDict):
@@ -34,3 +34,5 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanState, None]:
 
     # Release resources used by the vending machine.
     vending_machine.release_resources()
+
+    print("Resources released.")
