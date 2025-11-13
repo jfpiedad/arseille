@@ -13,7 +13,7 @@ def get_current_weather() -> Weather:
     url = settings.WEATHER_API_BASE_URL
 
     query_params = {
-        "q": "10.293893, 123.897487",
+        "q": "Cebu",
         "key": settings.WEATHER_API_KEY,
     }
 
@@ -29,6 +29,8 @@ def get_current_weather() -> Weather:
             temperature = data["current"]["temp_c"]
     except HTTPError:
         print("Cannot get weather data.")
+
+    print(temperature)
 
     if temperature < 20:
         weather = Weather.COLD
