@@ -30,8 +30,6 @@ def get_current_weather() -> Weather:
     except HTTPError:
         print("Cannot get weather data.")
 
-    print(temperature)
-
     if temperature < 20:
         weather = Weather.COLD
     elif 20 <= temperature <= 30:
@@ -40,8 +38,3 @@ def get_current_weather() -> Weather:
         weather = Weather.HOT
 
     return weather
-
-
-if __name__ == "__main__":
-    for _ in range(5):
-        get_current_weather()
