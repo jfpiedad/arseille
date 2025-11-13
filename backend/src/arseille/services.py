@@ -13,7 +13,7 @@ def get_current_weather() -> Weather:
     url = settings.WEATHER_API_BASE_URL
 
     query_params = {
-        "q": "Cebu",
+        "q": settings.TARGET_CITY,
         "key": settings.WEATHER_API_KEY,
     }
 

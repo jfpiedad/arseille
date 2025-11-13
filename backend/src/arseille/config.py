@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DB_CONNECTION_STRING: str
     DB_NAME: str
 
+    TARGET_CITY: str
     WEATHER_API_KEY: str
     WEATHER_API_BASE_URL: HttpUrl
 
