@@ -28,7 +28,7 @@ def get_current_weather() -> Weather:
             data = response.json()
             temperature = data["current"]["temp_c"]
     except HTTPError:
-        print("Cannot get weather data.")
+        print("Cannot get weather data. Now using default temperature value.")
 
     if temperature < 20:
         weather = Weather.COLD
