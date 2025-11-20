@@ -8,6 +8,7 @@ from mediapipe.tasks.python.components.containers.detections import DetectionRes
 
 GREEN = (0, 255, 0)
 YELLOW = (0, 255, 255)
+BOX_THICKNESS = 2
 
 MARGIN = 15
 FONT_SIZE = 2
@@ -57,7 +58,7 @@ def annotate_image_with_bounding_box(
             pt1=start_point,
             pt2=end_point,
             color=box_color,
-            thickness=2,
+            thickness=BOX_THICKNESS,
         )
 
     # If age is given, add the necessary label.
