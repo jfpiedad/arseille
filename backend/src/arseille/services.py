@@ -1,11 +1,12 @@
 from datetime import timedelta
 
-import httpx
 from cachetools.func import ttl_cache
-from httpx import HTTPError
+from httpx import Client, HTTPError
 
 from arseille.config import settings
 from arseille.enums import Weather
+
+client = Client()
 
 
 @ttl_cache(maxsize=128, ttl=timedelta(minutes=15).seconds)
@@ -21,7 +22,8 @@ def get_current_weather() -> Weather:
     temperature = 25
 
     try:
-        response = httpx.get(url=f"{url}/current.json", params=query_params)
+        response = client.get(url=f"{url}/current.json", params=query_params)
+
         response.raise_for_status()
 
         if response.status_code == 200:
