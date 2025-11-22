@@ -23,7 +23,7 @@ class AgeEstimator:
         self.thickness_per_pixel = thickness_per_pixel
 
         if weights_path is None:
-            self.weights_path = settings.ROOT_DIRECTORY / "weights" / "agenet.pt"
+            self.weights_path = settings.AGE_ESTIMATOR_WEIGHTS_PATH
         else:
             self.weights_path = Path(weights_path)
 

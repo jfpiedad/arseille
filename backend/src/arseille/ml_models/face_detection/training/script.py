@@ -27,13 +27,8 @@ def training(
     test: bool = False,
 ) -> None:
     """Train face detection model."""
-
-    root_directory = settings.ROOT_DIRECTORY
-
     if dataset_directory is None:
-        dataset_directory = (
-            root_directory / "datasets" / "face_detection" / "OpenImagesV7"
-        )
+        dataset_directory = settings.FACE_DETECTOR_DATASET_PATH / "OpenImagesV7"
 
     if test:
         batch_size = 1
@@ -64,10 +59,10 @@ def training(
     face_detection_model = face_detection_model.to(device)
 
     if weights_path is None:
-        weights_path = root_directory / "weights" / "blazeface.pt"
+        weights_path = settings.FACE_DETECTOR_WEIGHTS_PATH
         weights_path.parent.mkdir(parents=True, exist_ok=True)
 
-    anchors_path = root_directory / "anchors.npy"
+    anchors_path = settings.ROOT_DIRECTORY / "anchors.npy"
 
     if not anchors_path.exists():
         raise FileNotFoundError("Anchors file does not exist.")

@@ -28,11 +28,8 @@ def training(
 ) -> None:
     """Train age estimation model."""
 
-    root_directory = settings.ROOT_DIRECTORY
-    dataset_directory = root_directory / "datasets" / "age_estimation"
-
     if training_data_directory is None:
-        training_data_directory = dataset_directory / "UTKFace"
+        training_data_directory = settings.AGE_ESTIMATOR_DATASET_PATH / "UTKFace"
 
     if test:
         batch_size = 1
@@ -65,7 +62,7 @@ def training(
         steps_per_epoch = len(training_data)
 
     if weights_path is None:
-        weights_path = root_directory / "weights" / "agenet.pt"
+        weights_path = settings.AGE_ESTIMATOR_WEIGHTS_PATH
         weights_path.parent.mkdir(parents=True, exist_ok=True)
 
     train_model(
