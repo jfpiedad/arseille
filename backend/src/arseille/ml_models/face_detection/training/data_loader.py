@@ -24,10 +24,7 @@ class OpenImagesV7Dataset(Dataset):
         augment: A.Compose | None = None,
         is_training: bool = True,
     ) -> None:
-        if isinstance(directory, str):
-            self.directory = Path(directory)
-        else:
-            self.directory = directory
+        self.directory = Path(directory)
 
         if is_training:
             phase = "train"

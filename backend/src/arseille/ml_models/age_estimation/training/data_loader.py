@@ -17,11 +17,7 @@ class UTKFaceDataset(Dataset):
     dataset_filenames: list[str]
 
     def __init__(self, directory: str | Path, transform: Compose | None = None) -> None:
-        if isinstance(directory, str):
-            self.directory = Path(directory)
-        else:
-            self.directory = directory
-
+        self.directory = Path(directory)
         self.transform = transform
         self.dataset_filenames = self._get_filenames()
 

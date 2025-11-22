@@ -66,6 +66,7 @@ def training(
 
     if weights_path is None:
         weights_path = root_directory / "weights" / "agenet.pt"
+        weights_path.parent.mkdir(parents=True, exist_ok=True)
 
     train_model(
         epochs=epochs,

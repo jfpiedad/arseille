@@ -16,17 +16,16 @@ class AgeEstimator:
         self,
         face_size: int = 64,
         thickness_per_pixel: int | None = 500,
-        weights: Path | None = None,
+        weights_path: str | Path | None = None,
         device: torch.device | None = None,
     ) -> None:
         self.face_size = face_size
         self.thickness_per_pixel = thickness_per_pixel
 
-        if weights is None:
-            self.weights = settings.ROOT_DIRECTORY / "weights" / "agenet.pt"
-            # self.weights = Path.cwd() / "weights" / "agenet.pt"
+        if weights_path is None:
+            self.weights_path = settings.ROOT_DIRECTORY / "weights" / "agenet.pt"
         else:
-            self.weights = weights
+            self.weights_path = Path(weights_path)
 
         if device is None:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -36,9 +35,13 @@ class AgeEstimator:
         self.model = Model().to(device=device)
         self.model.eval()
 
-        if self.weights.exists():
+        if not self.weights_path.exists():
+            raise FileNotFoundError(
+                f"Could not load weights from path {self.weights_path}"
+            )
+        else:
             self.model.load_state_dict(
-                torch.load(self.weights, map_location="cpu"), strict=False
+                torch.load(self.weights_path, map_location="cpu"), strict=False
             )
 
     def predict_single(self, bounding_box: BoundingBox, image: np.ndarray) -> int:

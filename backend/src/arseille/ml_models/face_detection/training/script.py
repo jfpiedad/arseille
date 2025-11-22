@@ -65,11 +65,12 @@ def training(
 
     if weights_path is None:
         weights_path = root_directory / "weights" / "blazeface.pt"
+        weights_path.parent.mkdir(parents=True, exist_ok=True)
 
     anchors_path = root_directory / "anchors.npy"
 
     if not anchors_path.exists():
-        raise Exception("Anchors file does not exist.")
+        raise FileNotFoundError("Anchors file does not exist.")
 
     face_detection_model.load_anchors(str(anchors_path))
 
