@@ -6,6 +6,10 @@
   <body>
     <h1>OpenCV WebSocket Stream</h1>
     <img id="video-stream" width="640" height="480" />
+    <a href="/vending-machine?mode=1">Mode 1</a>
+    <a href="/vending-machine?mode=2">Mode 2</a>
+    <a href="/vending-machine?mode=3">Mode 3</a>
+
     <p id="age"></p>
     <p id="weather"></p>
 
@@ -13,7 +17,7 @@
       const imageElement = document.getElementById("video-stream");
       const ageDisplay = document.getElementById("age");
       const weatherDisplay = document.getElementById("weather");
-      const ws = new WebSocket("/ws/checkpoint/1");
+      const ws = new WebSocket("/vending-machine/stream?mode={{ mode }}");
 
       ws.binaryType = "arraybuffer";
       let currentImageUrl = null;

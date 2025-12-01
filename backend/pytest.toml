@@ -1,0 +1,9 @@
+[pytest]
+minversion = "9.0.0"
+addopts = ["-ra", "-v", "--maxfail=1"]
+testpaths = [
+    "tests"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]

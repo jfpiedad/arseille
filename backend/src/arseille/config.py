@@ -31,9 +31,15 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def FACE_DETECTOR_WEIGHTS_PATH(self) -> Path:
+    def FACE_DETECTOR_WEIGHTS_PATH_TRAINING(self) -> Path:
         """Face detector weights path."""
         return self.ROOT_DIRECTORY / "weights" / "blazeface.pt"
+
+    @computed_field
+    @property
+    def FACE_DETECTOR_WEIGHTS_PATH_INFERENCE(self) -> Path:
+        """Face detector weights path."""
+        return self.ROOT_DIRECTORY / "weights" / "blazeface.tflite"
 
     @computed_field
     @property

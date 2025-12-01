@@ -1,18 +1,21 @@
+import asyncio
 import json
 import struct
-from typing import Any
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Callable
 
 import cv2
 import numpy as np
 from mediapipe.tasks.python.components.containers.detections import DetectionResult
 
-GREEN = (0, 255, 0)
-YELLOW = (0, 255, 255)
-BOX_THICKNESS = 2
-
-MARGIN = 15
-FONT_SIZE = 2
-FONT_THICKNESS = 2
+from arseille.vending.constants import (
+    BGR_GREEN,
+    BGR_YELLOW,
+    BOX_THICKNESS,
+    FONT_SIZE,
+    FONT_THICKNESS,
+    MARGIN,
+)
 
 
 def sort_detection_results_desc(detection_result: DetectionResult) -> None:
@@ -49,9 +52,9 @@ def annotate_image_with_bounding_box(
         )
 
         if index == 0:
-            box_color = GREEN
+            box_color = BGR_GREEN
         else:
-            box_color = YELLOW
+            box_color = BGR_YELLOW
 
         cv2.rectangle(
             img=image_copy,
@@ -73,7 +76,7 @@ def annotate_image_with_bounding_box(
             org=text_location,
             fontFace=cv2.FONT_HERSHEY_PLAIN,
             fontScale=FONT_SIZE,
-            color=GREEN,
+            color=BGR_GREEN,
             thickness=FONT_THICKNESS,
         )
 
@@ -99,6 +102,37 @@ def concatenate_image_and_metadata(
     # This stores the length of the metadata
     header = struct.pack("<I", len(metadata_bytes))
 
-    payload = header + metadata_bytes + image_bytes
+    return b"".join([header, metadata_bytes, image_bytes])
 
-    return payload
+
+class TaskExecutor:
+    def __init__(
+        self, executor: ThreadPoolExecutor | None = None, workers: int = 2
+    ) -> None:
+        """Initializes a ThreadPoolExecutor."""
+        if executor is None:
+            self.executor = ThreadPoolExecutor(max_workers=workers)
+        else:
+            self.executor = executor
+
+    def add_task(
+        self,
+        task_fn: Callable[..., Any],
+        done_callback: Callable[[asyncio.Future], None],
+        **kwargs,
+    ) -> None:
+        """
+        Submits a task to the executor.
+
+        Parameters:
+            task_fn (Callable[..., Any]): The function that will be submitted and
+             executed through the executor.
+            done_callback (Callable[[asyncio.Future], None]): The callback function
+             after `task_fn` is done executing.
+        """
+        task = self.executor.submit(task_fn, **kwargs)
+        task.add_done_callback(done_callback)
+
+    def shutdown(self) -> None:
+        """Shuts down the executor and wait for it to finish."""
+        self.executor.shutdown(wait=True)

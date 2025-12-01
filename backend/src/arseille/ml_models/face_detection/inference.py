@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Callable
 
 import mediapipe
@@ -11,14 +12,13 @@ from mediapipe.tasks.python.vision.face_detector import (
     FaceDetectorOptions,
 )
 
-from arseille.config import settings
-
 
 def initialize_face_detector(
-    callback: Callable[[DetectionResult, mediapipe.Image, int], None],
+    model_asset_path: str | Path,
+    result_callback: Callable[[DetectionResult, mediapipe.Image, int], None],
 ) -> FaceDetector:
     """Initialize face detector object from Mediapipe."""
-    model_asset_path = settings.ROOT_DIRECTORY / "weights" / "blazeface.tflite"
+    model_asset_path = Path(model_asset_path)
 
     if not model_asset_path.exists():
         raise FileNotFoundError(f"Path {model_asset_path} does not exist.")
@@ -27,7 +27,7 @@ def initialize_face_detector(
     options = FaceDetectorOptions(
         base_options=base_options,
         running_mode=VisionTaskRunningMode.LIVE_STREAM,
-        result_callback=callback,
+        result_callback=result_callback,
     )
 
     return FaceDetector.create_from_options(options=options)

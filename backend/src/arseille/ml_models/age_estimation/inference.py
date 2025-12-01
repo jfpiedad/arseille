@@ -7,42 +7,33 @@ from mediapipe.tasks.python.components.containers.bounding_box import BoundingBo
 from PIL import Image
 from torchvision import transforms as T
 
-from arseille.config import settings
 from arseille.ml_models.age_estimation.agenet import Model
 
 
 class AgeEstimator:
     def __init__(
         self,
+        weights_path: str | Path,
         face_size: int = 64,
         thickness_per_pixel: int | None = 500,
-        weights_path: str | Path | None = None,
-        device: torch.device | None = None,
     ) -> None:
+        weights_path = Path(weights_path)
+
+        if not weights_path.exists():
+            raise FileNotFoundError(f"Path {weights_path} does not exist.")
+
+        self.weights_path = weights_path
         self.face_size = face_size
         self.thickness_per_pixel = thickness_per_pixel
 
-        if weights_path is None:
-            self.weights_path = settings.AGE_ESTIMATOR_WEIGHTS_PATH
-        else:
-            self.weights_path = Path(weights_path)
-
-        if device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.model = Model().to(device=device)
         self.model.eval()
 
-        if not self.weights_path.exists():
-            raise FileNotFoundError(
-                f"Could not load weights from path {self.weights_path}"
-            )
-        else:
-            self.model.load_state_dict(
-                torch.load(self.weights_path, map_location="cpu"), strict=False
-            )
+        self.model.load_state_dict(
+            torch.load(self.weights_path, map_location="cpu"), strict=False
+        )
 
     def predict_single(self, bounding_box: BoundingBox, image: np.ndarray) -> int:
         """

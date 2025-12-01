@@ -21,7 +21,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanState, None]:
     database = client[settings.DB_NAME]
 
     # Create vending machine object.
-    vending_machine = VendingMachine()
+    vending_machine = VendingMachine.create_standard()
 
     yield {
         "database": database,
@@ -33,6 +33,6 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanState, None]:
     await client.close()
 
     # Release resources used by the vending machine.
-    vending_machine.release_resources()
+    vending_machine.cleanup()
 
     print("Resources released.")

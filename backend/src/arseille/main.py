@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from arseille.lifespan import lifespan
-from arseille.vending.checkpoints import router
+from arseille.vending.routes import router
 
 app = FastAPI(lifespan=lifespan, swagger_ui_parameters={"operationsSorter": "method"})
 
@@ -28,9 +28,11 @@ templates = Jinja2Templates("static")
 app.include_router(router=router)
 
 
-@app.get("/vending", response_class=HTMLResponse)
-def vending(request: Request) -> Any:
-    return templates.TemplateResponse(request=request, name="index.html")
+@app.get("/vending-machine", response_class=HTMLResponse)
+def vending_machine(request: Request, mode: int) -> Any:
+    return templates.TemplateResponse(
+        request=request, name="index.html", context={"mode": mode}
+    )
 
 
 @app.get("/", response_class=PlainTextResponse)
