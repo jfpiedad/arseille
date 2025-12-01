@@ -1,6 +1,6 @@
 from fastapi import WebSocket, WebSocketException, status
 
-from arseille.vending.modes import VendingMode
+from arseille.vending.enums import VendingMode
 from arseille.vending.vending_machine import VendingMachine
 
 

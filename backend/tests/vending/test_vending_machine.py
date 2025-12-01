@@ -1,10 +1,10 @@
 import pytest
 from mediapipe.tasks.python.vision.face_detector import FaceDetector
 
-from arseille.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.ml_models.age_estimation.inference import AgeEstimator
 from arseille.vending.data import DetectionMetadata
-from arseille.vending.modes import VendingMode
+from arseille.vending.enums import VendingMode
+from arseille.vending.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine, VideoSource
 

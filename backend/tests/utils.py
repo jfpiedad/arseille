@@ -18,8 +18,8 @@ from mediapipe.tasks.python.components.containers.detections import (
 )
 
 from arseille.config import settings
-from arseille.enums import Weather
-from arseille.exceptions import InvalidVendingMode
+from arseille.vending.enums import Weather
+from arseille.vending.exceptions import InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine
 

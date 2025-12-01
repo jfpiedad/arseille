@@ -11,7 +11,7 @@ from respx import Route
 from arseille.config import settings
 from arseille.main import app
 from arseille.vending.dependencies import get_vending_machine
-from arseille.vending.modes import VendingMode
+from arseille.vending.enums import VendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine
 from tests.utils import (

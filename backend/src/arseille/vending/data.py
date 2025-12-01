@@ -3,7 +3,7 @@ from typing import Any
 
 import numpy as np
 
-from arseille.enums import Weather
+from arseille.vending.enums import Weather
 
 
 @dataclass

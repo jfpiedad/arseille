@@ -8,7 +8,6 @@ from mediapipe.tasks.python.components.containers.detections import DetectionRes
 from mediapipe.tasks.python.vision.face_detector import FaceDetector
 
 from arseille.config import settings
-from arseille.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.ml_models.age_estimation.inference import AgeEstimator
 from arseille.ml_models.face_detection.inference import initialize_face_detector
 from arseille.vending.checkpoints import (
@@ -18,7 +17,8 @@ from arseille.vending.checkpoints import (
     Checkpoint75Percent,
 )
 from arseille.vending.data import DetectionMetadata
-from arseille.vending.modes import VendingMode
+from arseille.vending.enums import VendingMode
+from arseille.vending.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 
 

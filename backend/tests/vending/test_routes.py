@@ -9,7 +9,7 @@ from httpx_ws import AsyncWebSocketSession, aconnect_ws
 from pytest import FixtureRequest
 from respx import Route
 
-from arseille.enums import Weather
+from arseille.vending.enums import Weather
 from tests.utils import DummyFaceDetector, unpack_vending_stream_data
 from tests.vending.test_utils import TEST_IMAGE_HEIGHT, TEST_IMAGE_WIDTH
 

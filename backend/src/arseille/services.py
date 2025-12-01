@@ -4,7 +4,7 @@ from cachetools.func import ttl_cache
 from httpx import Client, HTTPError
 
 from arseille.config import settings
-from arseille.enums import Weather
+from arseille.vending.enums import Weather
 
 client = Client()
 
