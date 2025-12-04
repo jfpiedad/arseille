@@ -106,10 +106,16 @@ def concatenate_image_and_metadata(
 
 
 class TaskExecutor:
+    """
+    Executor where tasks are submitted and invokes the corresponding callback function
+    after the task is finished.
+
+    Uses `ThreadPoolExecutor`.
+    """
+
     def __init__(
         self, executor: ThreadPoolExecutor | None = None, workers: int = 2
     ) -> None:
-        """Initializes a ThreadPoolExecutor."""
         if executor is None:
             self.executor = ThreadPoolExecutor(max_workers=workers)
         else:
@@ -124,7 +130,7 @@ class TaskExecutor:
         """
         Submits a task to the executor.
 
-        Parameters:
+        Args:
             task_fn (Callable[..., Any]): The function that will be submitted and
              executed through the executor.
             done_callback (Callable[[asyncio.Future], None]): The callback function

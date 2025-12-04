@@ -23,11 +23,18 @@ from arseille.vending.utils import TaskExecutor
 
 
 class VideoSource:
+    """
+    Initialize a video source using OpenCV's VideoCapture.
+
+    Attributes:
+        video_feed (VideoCapture): OpenCV's video capture object.
+    """
+
     def __init__(self, index: int = 0) -> None:
         """
-        Initialize a video source using OpenCV's VideoCapture.
+        Initialize a video source.
 
-        Attributes:
+        Args:
             index (int): The camera index to use on initialization.
         """
         self.video_feed = VideoCapture(index=index)
@@ -67,6 +74,13 @@ class VendingMachine:
 
     It is designed to only process one user at a time just like
     how a real vending machine would.
+
+    Attributes:
+        video_source (VideoSource): The video feed which produces image frames.
+        face_detector (FaceDetector): The face detector model object from MediaPipe.
+        age_estimator (AgeEstimator): The age estimator model object.
+        task_executor (TaskExecutor): Executor where tasks are submitted and
+            offloaded to a thread.
     """
 
     _mode: VendingMode
@@ -81,13 +95,6 @@ class VendingMachine:
     ) -> None:
         """
         Initializes the vending machine object and its dependencies.
-
-        Attributes:
-            video_source (VideoSource): The video feed which produces frames.
-            face_detector (FaceDetector): The face detector model object from MediaPipe.
-            age_estimator (AgeEstimator): The age estimator model object.
-            task_executor (TaskExecutor): Executor where tasks are submitted and
-                offloaded to a thread.
         """
         self.video_source = video_source
         self.face_detector = face_detector

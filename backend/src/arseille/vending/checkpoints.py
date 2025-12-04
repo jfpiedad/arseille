@@ -13,6 +13,23 @@ from arseille.vending.utils import TaskExecutor, annotate_image_with_bounding_bo
 
 
 class BaseVMCheckpoint(ABC):
+    """
+    Abstract vending machine checkpoint class.
+
+    Defines the callbacks of age estimator task and weather task that are submitted
+    in the ThreadPoolExecutor. It also defines a helper method and common variables used
+    in the concrete classes.
+
+    Attributes:
+        metadata_obj (DetectionMetadata): The reference of the metadata object
+            instantiated on the vending machine class.
+        age_estimator (AgeEstimator, optional): The age estimator model object.
+        task_executor (TaskExecutor, optional): Executor where tasks are submitted and
+            offloaded to a thread.
+        recent_frames (deque): A queue that stores the frames of the recent detection
+            results. The max length of the queue is `20`.
+    """
+
     def __init__(
         self,
         metadata_obj: DetectionMetadata,
@@ -22,11 +39,11 @@ class BaseVMCheckpoint(ABC):
         self.metadata_obj = metadata_obj
         self.age_estimator = age_estimator
         self.task_executor = task_executor
-
         self.recent_frames = deque([], maxlen=20)
-        self.cancelled = False
-        self.age_estimation_task_in_progress = False
-        self.weather_task_in_progress = False
+
+        self._cancelled = False
+        self._age_estimation_task_in_progress = False
+        self._weather_task_in_progress = False
 
     @abstractmethod
     def process(
@@ -34,10 +51,10 @@ class BaseVMCheckpoint(ABC):
     ) -> None:
         pass
 
-    def age_estimator_task_callback(self, age_task: Future) -> None:
+    def _age_estimator_task_callback(self, age_task: Future) -> None:
         """Callback function after the age estimation task/future is done."""
 
-        if self.cancelled:
+        if self._cancelled:
             # If the flag is True, it means the result of this callback is stale.
             # This flag is used to prevent a race condition that may possibly result
             # a stale data.
@@ -49,7 +66,7 @@ class BaseVMCheckpoint(ABC):
             # camera and since the callback is probably finished this time, the age
             # shown is actually the age of Person 1. Though this scenario is an extreme
             # edge case and is prone to happening on slower systems.
-            self.age_estimation_task_in_progress = False
+            self._age_estimation_task_in_progress = False
             return
 
         try:
@@ -58,9 +75,9 @@ class BaseVMCheckpoint(ABC):
             print(f"Age estimation task failed.\n {exc}")
             self.metadata_obj.age = None
         finally:
-            self.age_estimation_task_in_progress = False
+            self._age_estimation_task_in_progress = False
 
-    def weather_task_callback(self, weather_task: Future) -> None:
+    def _weather_task_callback(self, weather_task: Future) -> None:
         """Callback function after getting the get weather task/future is done."""
 
         try:
@@ -69,13 +86,13 @@ class BaseVMCheckpoint(ABC):
             print(f"Getting weather data failed.\n {exc}")
             self.metadata_obj.weather = None
         finally:
-            self.weather_task_in_progress = False
+            self._weather_task_in_progress = False
 
-    def reset(self) -> None:
+    def _reset(self) -> None:
         """Reset some variables and object to its initial values."""
         self.metadata_obj.age = None
         self.recent_frames.clear()
-        self.cancelled = True
+        self._cancelled = True
 
 
 class VMCheckpoint25(BaseVMCheckpoint):
@@ -96,12 +113,12 @@ class VMCheckpoint50(BaseVMCheckpoint):
     ) -> None:
         if detection_result.detections:
             if self._is_submission_allowed():
-                self.age_estimation_task_in_progress = True
-                self.cancelled = False
+                self._age_estimation_task_in_progress = True
+                self._cancelled = False
 
                 self.task_executor.add_task(
                     task_fn=self.age_estimator.predict,
-                    done_callback=self.age_estimator_task_callback,
+                    done_callback=self._age_estimator_task_callback,
                     face_detection_data=list(self.recent_frames),
                 )
 
@@ -115,7 +132,7 @@ class VMCheckpoint50(BaseVMCheckpoint):
             )
         else:
             self.metadata_obj.annotated_image = image
-            self.reset()
+            self._reset()
 
     def _is_submission_allowed(self) -> None:
         """
@@ -128,7 +145,7 @@ class VMCheckpoint50(BaseVMCheckpoint):
         return (
             len(self.recent_frames) == FRAMES_LIMIT
             and self.metadata_obj.age is None
-            and not self.age_estimation_task_in_progress
+            and not self._age_estimation_task_in_progress
         )
 
 
@@ -138,18 +155,18 @@ class VMCheckpoint75(BaseVMCheckpoint):
     ) -> None:
         if detection_result.detections:
             if self._is_submission_allowed():
-                self.age_estimation_task_in_progress = True
-                self.cancelled = False
+                self._age_estimation_task_in_progress = True
+                self._cancelled = False
 
                 self.task_executor.add_task(
                     task_fn=self.age_estimator.predict,
-                    done_callback=self.age_estimator_task_callback,
+                    done_callback=self._age_estimator_task_callback,
                     face_detection_data=list(self.recent_frames),
                 )
 
                 self.task_executor.add_task(
                     task_fn=get_current_weather,
-                    done_callback=self.weather_task_callback,
+                    done_callback=self._weather_task_callback,
                 )
 
             bounding_box = detection_result.detections[0].bounding_box
@@ -162,7 +179,7 @@ class VMCheckpoint75(BaseVMCheckpoint):
             )
         else:
             self.metadata_obj.annotated_image = image
-            self.reset()
+            self._reset()
 
     def _is_submission_allowed(self) -> None:
         """
@@ -177,8 +194,8 @@ class VMCheckpoint75(BaseVMCheckpoint):
         return (
             len(self.recent_frames) == FRAMES_LIMIT
             and self.metadata_obj.age is None
-            and not self.age_estimation_task_in_progress
-            and not self.weather_task_in_progress
+            and not self._age_estimation_task_in_progress
+            and not self._weather_task_in_progress
         )
 
 
