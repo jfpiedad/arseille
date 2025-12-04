@@ -87,7 +87,7 @@ def dummy_vending_machine(
     )
 
     face_detector = DummyFaceDetector()
-    face_detector.callback = vm.result_callback
+    face_detector.callback = vm._result_callback
     vm.face_detector = face_detector
 
     yield vm

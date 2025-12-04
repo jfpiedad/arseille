@@ -3,7 +3,6 @@ from mediapipe.tasks.python.vision.face_detector import FaceDetector
 
 from arseille.ml_models.age_estimation.inference import AgeEstimator
 from arseille.vending.data import DetectionMetadata
-from arseille.vending.enums import VendingMode
 from arseille.vending.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine, VideoSource
@@ -15,14 +14,14 @@ def test_video_source_invalid_camera_index() -> None:
 
 
 def test_vending_machine_factory_creation() -> None:
-    vm = VendingMachine.create_standard()
+    vm = VendingMachine.create_default()
 
     assert isinstance(vm, VendingMachine)
     assert isinstance(vm.video_source, VideoSource)
     assert isinstance(vm.face_detector, FaceDetector)
     assert isinstance(vm.age_estimator, AgeEstimator)
     assert isinstance(vm.task_executor, TaskExecutor)
-    assert isinstance(vm.metadata_obj, DetectionMetadata)
+    assert isinstance(vm._metadata_obj, DetectionMetadata)
 
     vm.cleanup()
 
@@ -31,25 +30,21 @@ def test_vending_machine_factory_creation() -> None:
 async def test_vending_machine_invalid_mode(
     dummy_vending_machine: VendingMachine,
 ) -> None:
-    dummy_vending_machine.set_mode(-1)
-
     with pytest.raises(InvalidVendingMode):
-        await dummy_vending_machine.set_unavailable()
+        dummy_vending_machine.set_mode(-1)
 
 
 @pytest.mark.anyio
-async def test_vening_machine_availability(
+async def test_vending_machine_context_manager(
     dummy_vending_machine: VendingMachine,
 ) -> None:
     assert dummy_vending_machine._lock.locked() is False
 
-    with pytest.raises(InvalidVendingMode):
-        await dummy_vending_machine.set_unavailable()
+    async with dummy_vending_machine as vm:
+        assert vm._lock.locked() is True
+        vm._metadata_obj.age = 10
+        vm._metadata_obj.timestamp = 123456
 
-    dummy_vending_machine.set_mode(VendingMode.CHECKPOINT_25)
-
-    await dummy_vending_machine.set_unavailable()
-    assert dummy_vending_machine._lock.locked() is True
-
-    dummy_vending_machine.set_available()
-    assert dummy_vending_machine._lock.locked() is False
+    assert vm._metadata_obj.age is None
+    assert vm._metadata_obj.timestamp is None
+    assert vm._lock.locked() is False

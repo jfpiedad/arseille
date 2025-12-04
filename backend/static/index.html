@@ -17,7 +17,7 @@
       const imageElement = document.getElementById("video-stream");
       const ageDisplay = document.getElementById("age");
       const weatherDisplay = document.getElementById("weather");
-      const ws = new WebSocket("/vending-machine/stream?mode={{ mode }}");
+      const ws = new WebSocket("/vending-machine/checkpoint?mode={{ mode }}");
 
       ws.binaryType = "arraybuffer";
       let currentImageUrl = null;

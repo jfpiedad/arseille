@@ -19,7 +19,6 @@ from mediapipe.tasks.python.components.containers.detections import (
 
 from arseille.config import settings
 from arseille.vending.enums import Weather
-from arseille.vending.exceptions import InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine
 
@@ -72,21 +71,17 @@ def create_dummy_vending_machine() -> VendingMachine:
     )
 
     face_detector = DummyFaceDetector()
-    face_detector.callback = vm.result_callback
+    face_detector.callback = vm._result_callback
     vm.face_detector = face_detector
 
     return vm
 
 
 class DummyVendingMachine(VendingMachine):
-    async def set_unavailable(self) -> None:
+    async def __aenter__(self) -> "DummyVendingMachine":
+        await super().__aenter__()
         DummyFaceDetector._RAISE_WEBSOCKET_DISCONNECT = False
-
-        if self._mode not in self._modes_mapping:
-            raise InvalidVendingMode
-
-    def set_available(self) -> None:
-        pass
+        return self
 
 
 class DummyExecutor(Executor):

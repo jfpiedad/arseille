@@ -11,10 +11,10 @@ from arseille.config import settings
 from arseille.ml_models.age_estimation.inference import AgeEstimator
 from arseille.ml_models.face_detection.inference import initialize_face_detector
 from arseille.vending.checkpoints import (
-    BaseCheckpoint,
-    Checkpoint25Percent,
-    Checkpoint50Percent,
-    Checkpoint75Percent,
+    BaseVMCheckpoint,
+    VMCheckpoint25,
+    VMCheckpoint50,
+    VMCheckpoint75,
 )
 from arseille.vending.data import DetectionMetadata
 from arseille.vending.enums import VendingMode
@@ -70,7 +70,7 @@ class VendingMachine:
     """
 
     _mode: VendingMode
-    _modes_mapping: dict[VendingMode, BaseCheckpoint]
+    _strategies: dict[VendingMode, BaseVMCheckpoint]
 
     def __init__(
         self,
@@ -87,30 +87,56 @@ class VendingMachine:
             face_detector (FaceDetector): The face detector model object from MediaPipe.
             age_estimator (AgeEstimator): The age estimator model object.
             task_executor (TaskExecutor): Executor where tasks are submitted and
-             offloaded to a thread.
+                offloaded to a thread.
         """
         self.video_source = video_source
         self.face_detector = face_detector
         self.age_estimator = age_estimator
         self.task_executor = task_executor
 
-        self.metadata_obj = DetectionMetadata()
-
-        self._checkpoint25 = Checkpoint25Percent()
-        self._checkpoint50 = Checkpoint50Percent()
-        self._checkpoint75 = Checkpoint75Percent()
-
+        self._lock = asyncio.Lock()
+        self._metadata_obj = DetectionMetadata()
         self._mode = None
-        self._modes_mapping = {
-            VendingMode.CHECKPOINT_25: self._checkpoint25,
-            VendingMode.CHECKPOINT_50: self._checkpoint50,
-            VendingMode.CHECKPOINT_75: self._checkpoint75,
+
+        self._strategies = {
+            VendingMode.CHECKPOINT_25: VMCheckpoint25(
+                metadata_obj=self._metadata_obj,
+            ),
+            VendingMode.CHECKPOINT_50: VMCheckpoint50(
+                metadata_obj=self._metadata_obj,
+                age_estimator=self.age_estimator,
+                task_executor=self.task_executor,
+            ),
+            VendingMode.CHECKPOINT_75: VMCheckpoint75(
+                metadata_obj=self._metadata_obj,
+                age_estimator=self.age_estimator,
+                task_executor=self.task_executor,
+            ),
         }
 
-        self._lock = asyncio.Lock()
+    async def __aenter__(self) -> "VendingMachine":
+        """Acquire the lock and return `self` upong entering the runtime context."""
+        await self._lock.acquire()
+        return self
+
+    async def __aexit__(
+        self, unused_exc_type, unused_exc_value, unused_traceback
+    ) -> None:
+        """
+        Upon exiting the context manager:
+
+        - Clear the recent frames queue from the checkpoint objects.
+        - Reset values of the metadata object to `None`.
+        - Release the lock.
+        """
+        for strategy in self._strategies.values():
+            strategy.recent_frames.clear()
+
+        self._metadata_obj.clear()
+        self._lock.release()
 
     @classmethod
-    def create_standard(cls) -> "VendingMachine":
+    def create_default(cls) -> "VendingMachine":
         """Creates the vending machine object with standard configuration."""
         vm = cls(
             video_source=VideoSource(),
@@ -123,30 +149,24 @@ class VendingMachine:
 
         vm.face_detector = initialize_face_detector(
             model_asset_path=settings.FACE_DETECTOR_WEIGHTS_PATH_INFERENCE,
-            result_callback=vm.result_callback,
+            result_callback=vm._result_callback,
         )
 
         return vm
 
     def set_mode(self, mode: VendingMode) -> None:
-        self._mode = mode
-
-    async def set_unavailable(self) -> None:
-        if self._mode not in self._modes_mapping:
+        if mode not in VendingMode:
             raise InvalidVendingMode
 
-        await self._lock.acquire()
+        self._mode = mode
 
-    def set_available(self) -> None:
-        if self._lock.locked():
-            self._lock.release()
+    async def run_checkpoint(self) -> AsyncGenerator[DetectionMetadata, None]:
+        async for image, timestamp_ms in self.video_source.read():
+            self.face_detector.detect_async(image=image, timestamp_ms=timestamp_ms)
+            yield self._metadata_obj
 
-    def clear_metadata_obj(self) -> None:
-        self.metadata_obj.clear()
-
-    def clear_recent_detection_results(self) -> None:
-        self._checkpoint50.recent_detection_results.clear()
-        self._checkpoint75.recent_detection_results.clear()
+    async def run(self) -> None:
+        pass
 
     def cleanup(self) -> None:
         """
@@ -161,20 +181,15 @@ class VendingMachine:
         self.video_source.close()
         self.task_executor.shutdown()
 
-    def result_callback(
+    def _result_callback(
         self,
         detection_result: DetectionResult,
         output_image: mediapipe.Image,
         timestamp_ms: int,
     ) -> None:
-        """Callback function after a successful face detection."""
-        self.metadata_obj.timestamp = timestamp_ms
         image = output_image.numpy_view()
+        self._metadata_obj.timestamp = timestamp_ms
 
-        self._modes_mapping[self._mode].process(
-            metadata_obj=self.metadata_obj,
-            detection_result=detection_result,
-            image=image,
-            age_estimator=self.age_estimator,
-            executor=self.task_executor,
+        self._strategies[self._mode].process(
+            detection_result=detection_result, image=image, timestamp_ms=timestamp_ms
         )

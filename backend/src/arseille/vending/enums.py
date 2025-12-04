@@ -35,3 +35,16 @@ class VendingMode(Enum):
     checkpoints. This includes user interaction, where it is simulated in the browser.
     The interaction is similar on how you would interact with an actual vending machine.
     """
+
+
+class InboundInstruction(StrEnum):
+    START_ORDER = "START ORDER"
+    VEND = "VEND"
+    TAKE_DRINK = "TAKE DRINK"
+
+
+class OutboundInstruction(StrEnum):
+    PROCESSING_USER = "PROCESSING USER"
+    DISPLAY_DRINKS = "DISPLAY DRINKS"
+    PREPARING_DRINK = "PREPARING DRINK"
+    DRINK_READY = "DRINK READY"

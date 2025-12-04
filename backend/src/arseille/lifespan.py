@@ -21,7 +21,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[LifespanState, None]:
     database = client[settings.DB_NAME]
 
     # Create vending machine object.
-    vending_machine = VendingMachine.create_standard()
+    vending_machine = VendingMachine.create_default()
 
     yield {
         "database": database,
