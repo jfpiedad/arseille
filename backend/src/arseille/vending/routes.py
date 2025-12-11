@@ -45,8 +45,8 @@ async def vending_machine_checkpoint(
     websocket: WebSocket,
     vending_machine: Annotated[VendingMachine, Depends(get_vending_machine)],
 ) -> None:
-    async with vending_machine as vm:
-        async with ws_exception_handler(websocket=websocket, run_type="Checkpoint"):
+    async with ws_exception_handler(websocket=websocket, run_type="Checkpoint"):
+        async with vending_machine as vm:
             async for metadata in vm.run_checkpoint():
                 if metadata.annotated_image is not None:
                     message = concatenate_image_and_metadata(
@@ -62,8 +62,8 @@ async def vending_machine(
     vending_machine: Annotated[VendingMachine, Depends(get_vending_machine)],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ) -> None:
-    async with vending_machine as vm:
-        async with ws_exception_handler(websocket=websocket, run_type="Simulation"):
+    async with ws_exception_handler(websocket=websocket, run_type="Simulation"):
+        async with vending_machine as vm:
             await vm.simulate(websocket=websocket, db=db)
 
 

@@ -88,9 +88,9 @@ class BaseVMCheckpoint(ABC):
 
         try:
             self.metadata_obj.age = age_task.result()
-        except Exception as exc:
-            print(f"Age estimation task failed.\n {exc}")
+        except Exception:
             self.metadata_obj.age = None
+            raise
         finally:
             self._age_estimation_task_in_progress = False
 
@@ -99,9 +99,9 @@ class BaseVMCheckpoint(ABC):
 
         try:
             self.metadata_obj.weather = weather_task.result()
-        except Exception as exc:
-            print(f"Getting weather data failed.\n {exc}")
+        except Exception:
             self.metadata_obj.weather = None
+            raise
         finally:
             self._weather_task_in_progress = False
 
