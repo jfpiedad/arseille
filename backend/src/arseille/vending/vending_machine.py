@@ -2,10 +2,13 @@ import asyncio
 import time
 from typing import AsyncGenerator
 
+import cv2
 import mediapipe
 from cv2 import VideoCapture
+from fastapi import WebSocket
 from mediapipe.tasks.python.components.containers.detections import DetectionResult
 from mediapipe.tasks.python.vision.face_detector import FaceDetector
+from pymongo.asynchronous.database import AsyncDatabase
 
 from arseille.config import settings
 from arseille.ml_models.age_estimation.inference import AgeEstimator
@@ -15,6 +18,7 @@ from arseille.vending.checkpoints import (
     VMCheckpoint25,
     VMCheckpoint50,
     VMCheckpoint75,
+    VMFullSystem,
 )
 from arseille.vending.data import DetectionMetadata
 from arseille.vending.enums import VendingMode
@@ -46,9 +50,8 @@ class VideoSource:
         """
         Asynchronously yields frames from the webcam.
 
-        Each iteration returns a tuple `(image, timestamp)`, where:
-            - `image` is the captured frame converted to a `mediapipe.Image` in
-            in RGB format.
+        Each iteration yields a tuple `(image, timestamp)`, where:
+            - `image` is the captured frame converted to a `mediapipe.Image`.
             - `timestamp` is the capture time in milliseconds since the epoch.
         """
         while True:
@@ -84,7 +87,7 @@ class VendingMachine:
     """
 
     _mode: VendingMode
-    _strategies: dict[VendingMode, BaseVMCheckpoint]
+    _strategies: dict[VendingMode, BaseVMCheckpoint | VMFullSystem]
 
     def __init__(
         self,
@@ -119,6 +122,11 @@ class VendingMachine:
                 age_estimator=self.age_estimator,
                 task_executor=self.task_executor,
             ),
+            VendingMode.FULL_SYSTEM: VMFullSystem(
+                camera_feed=self.video_source.read,
+                face_detector=None,
+                age_estimator=self.age_estimator,
+            ),
         }
 
     async def __aenter__(self) -> "VendingMachine":
@@ -136,15 +144,16 @@ class VendingMachine:
         - Reset values of the metadata object to `None`.
         - Release the lock.
         """
-        for strategy in self._strategies.values():
-            strategy.recent_frames.clear()
+        for mode, strategy in self._strategies.items():
+            if mode != VendingMode.FULL_SYSTEM:
+                strategy.recent_frames.clear()
 
         self._metadata_obj.clear()
         self._lock.release()
 
     @classmethod
     def create_default(cls) -> "VendingMachine":
-        """Creates the vending machine object with standard configuration."""
+        """Creates the vending machine object with default configuration."""
         vm = cls(
             video_source=VideoSource(),
             face_detector=None,
@@ -168,12 +177,45 @@ class VendingMachine:
         self._mode = mode
 
     async def run_checkpoint(self) -> AsyncGenerator[DetectionMetadata, None]:
+        """Entry point when running checkpoints."""
         async for image, timestamp_ms in self.video_source.read():
             self.face_detector.detect_async(image=image, timestamp_ms=timestamp_ms)
             yield self._metadata_obj
 
-    async def run(self) -> None:
-        pass
+    async def simulate(self, websocket: WebSocket, db: AsyncDatabase) -> None:
+        """
+        Entry point for simulating the order process of the vending machine.
+
+        Used in conjunction with `self.run` when vending machine is run with the mode
+        full system.
+        """
+        await self._strategies[self._mode].simulate(websocket=websocket, db=db)
+
+    async def run(self) -> AsyncGenerator[bytes, None]:
+        """
+        Entry point for the camera feed/stream with face detection.
+
+        Used in conjunction with `self.simulate` when vending machine is run with the
+        mode full system.
+        """
+        # Since the mapping of strategies is defined in the init method and face
+        # detector object is defined after creation of the VendingMachine class,
+        # we attach face detector before the full system mode runs.
+        if self._strategies[VendingMode.FULL_SYSTEM].face_detector is None:
+            self._strategies[VendingMode.FULL_SYSTEM].face_detector = self.face_detector
+
+        stream = self._strategies[VendingMode.FULL_SYSTEM].camera_stream()
+
+        async for image in stream:
+            image_bytes = None
+
+            if image is not None:
+                encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+
+                _, buffer = cv2.imencode(".jpg", img=image, params=encode_params)
+                image_bytes = buffer.tobytes()
+
+            yield image_bytes
 
     def cleanup(self) -> None:
         """
@@ -194,6 +236,12 @@ class VendingMachine:
         output_image: mediapipe.Image,
         timestamp_ms: int,
     ) -> None:
+        """
+        Callback function after a successful face detection.
+
+        This callback will be attached on the `FaceDetector` object during
+        instantiation.
+        """
         image = output_image.numpy_view()
         self._metadata_obj.timestamp = timestamp_ms
 

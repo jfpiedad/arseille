@@ -41,6 +41,7 @@ class InboundInstruction(StrEnum):
     START_ORDER = "START ORDER"
     VEND = "VEND"
     TAKE_DRINK = "TAKE DRINK"
+    CANCEL = "CANCEL"
 
 
 class OutboundInstruction(StrEnum):
@@ -48,3 +49,4 @@ class OutboundInstruction(StrEnum):
     DISPLAY_DRINKS = "DISPLAY DRINKS"
     PREPARING_DRINK = "PREPARING DRINK"
     DRINK_READY = "DRINK READY"
+    RESET = "RESET"

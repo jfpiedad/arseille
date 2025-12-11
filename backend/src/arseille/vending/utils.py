@@ -16,6 +16,7 @@ from arseille.vending.constants import (
     FONT_THICKNESS,
     MARGIN,
 )
+from arseille.vending.enums import AgeGroup
 
 
 def sort_detection_results_desc(detection_result: DetectionResult) -> None:
@@ -81,6 +82,22 @@ def annotate_image_with_bounding_box(
         )
 
     return image_copy
+
+
+def determine_age_group(age: int) -> AgeGroup:
+    if age < 0:
+        raise ValueError("Age cannot be negative.")
+
+    if age < 13:
+        age_group = AgeGroup.CHILD
+    elif 13 <= age <= 19:
+        age_group = AgeGroup.TEEN
+    elif 20 <= age <= 59:
+        age_group = AgeGroup.ADULT
+    else:
+        age_group = AgeGroup.SENIOR
+
+    return age_group
 
 
 def concatenate_image_and_metadata(

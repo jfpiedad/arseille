@@ -35,6 +35,11 @@ def vending_machine(request: Request, mode: int) -> Any:
     )
 
 
+@app.get("/vending-machine/simulation", response_class=HTMLResponse)
+def vending_machine_simulation(request: Request) -> Any:
+    return templates.TemplateResponse(request=request, name="simulation.html")
+
+
 @app.get("/", response_class=PlainTextResponse)
 async def root() -> Any:
     return "Hello World"

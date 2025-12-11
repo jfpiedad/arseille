@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet" />
+    <!-- <link href="./styles.css" rel="stylesheet" /> -->
+    <title>Vending</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left">
+        <img id="video-stream" />
+        <p id="age"></p>
+        <p id="weather"></p>
+
+        <script>
+          const imageElement = document.getElementById("video-stream");
+          const cameraStream = new WebSocket("/vending-machine/camera-stream");
+
+          cameraStream.binaryType = "arraybuffer";
+          let currentImageUrl = null;
+          let processing = false;
+
+          cameraStream.addEventListener("open", () => {
+            console.log("WebSocket connected.");
+          });
+
+          cameraStream.addEventListener("close", (event) => {
+            console.log("WebSocket disconnected", event);
+            console.log("Code:", event.code);
+            console.log("Reason:", event.reason);
+            console.log("WasClean:", event.wasClean);
+          });
+
+          cameraStream.addEventListener("error", (error) => {
+            console.error(`WebSocket error: ${error}`);
+          });
+
+          cameraStream.addEventListener("message", (event) => {
+            if (processing) {
+              console.log("Still processing previous frame.");
+              return;
+            }
+
+            processing = true;
+
+            const buffer = event.data;
+
+            try {
+              const imageBlob = new Blob([buffer], { type: "image/jpeg" });
+
+              const newImageUrl = URL.createObjectURL(imageBlob);
+
+              imageElement.src = newImageUrl;
+
+              if (currentImageUrl) {
+                URL.revokeObjectURL(currentImageUrl);
+              }
+
+              currentImageUrl = newImageUrl;
+            } catch (error) {
+              console.error(`Error parsing binary message: ${error}`);
+            } finally {
+              processing = false;
+            }
+          });
+        </script>
+      </div>
+      <div class="right"></div>
+    </div>
+    <script src="{{ url_for('static', path='/index.js')}}"></script>
+    <!-- <script src="./index.js"></script> -->
+  </body>
+</html>

@@ -3,7 +3,13 @@ from typing import Any
 
 import numpy as np
 
-from arseille.vending.enums import Weather
+from arseille.vending.enums import (
+    AgeGroup,
+    InboundInstruction,
+    OutboundInstruction,
+    Weather,
+)
+from arseille.vending.schemas import ArseilleBase
 
 
 @dataclass
@@ -11,8 +17,10 @@ class DetectionMetadata:
     """
     Metadata information after a successful detection.
 
-    This will be continuously streamed to the frontend through a websocket connection
-    during checkpoints since checkpoints do not include user interaction.
+    The object that will be continuously serialized to be sent to the
+    frontend through the websocket.
+
+    **Only used during checkpoints.**
     """
 
     annotated_image: np.ndarray | None = None
@@ -30,3 +38,19 @@ class DetectionMetadata:
         self.age = None
         self.weather = None
         self.timestamp = None
+
+
+class DetectionData(ArseilleBase):
+    age: int
+    age_group: AgeGroup
+    weather: Weather
+
+
+class InboundMessage(ArseilleBase):
+    type: InboundInstruction
+    transaction_data: dict[str, Any] | None = None
+
+
+class OutboundMessage(ArseilleBase):
+    type: OutboundInstruction
+    detection_data: dict[str, Any] | None = None

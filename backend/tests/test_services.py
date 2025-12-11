@@ -5,8 +5,8 @@ from httpx import Response
 from pytest import CaptureFixture
 from respx import Route
 
-from arseille.services import get_current_weather
 from arseille.vending.enums import Weather
+from arseille.vending.services import get_current_weather
 
 
 @pytest.fixture

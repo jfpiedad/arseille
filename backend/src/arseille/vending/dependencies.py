@@ -1,4 +1,5 @@
 from fastapi import WebSocket, WebSocketException, status
+from pymongo.asynchronous.database import AsyncDatabase
 
 from arseille.vending.enums import VendingMode
 from arseille.vending.vending_machine import VendingMachine
@@ -11,6 +12,7 @@ async def get_vending_machine(websocket: WebSocket, mode: int) -> VendingMachine
         1: VendingMode.CHECKPOINT_25,
         2: VendingMode.CHECKPOINT_50,
         3: VendingMode.CHECKPOINT_75,
+        4: VendingMode.FULL_SYSTEM,
     }
 
     if mode not in mode_mapping:
@@ -19,3 +21,7 @@ async def get_vending_machine(websocket: WebSocket, mode: int) -> VendingMachine
     vending.set_mode(mode=mode_mapping[mode])
 
     return vending
+
+
+async def get_db(websocket: WebSocket) -> AsyncDatabase:
+    return websocket.state.database

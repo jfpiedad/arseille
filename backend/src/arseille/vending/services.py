@@ -1,10 +1,14 @@
 from datetime import timedelta
+from typing import Any
 
+from bson import ObjectId
 from cachetools.func import ttl_cache
 from httpx import Client, HTTPError
+from pymongo.asynchronous.database import AsyncDatabase
 
 from arseille.config import settings
 from arseille.vending.enums import Weather
+from arseille.vending.schemas import TransactionCreate
 
 client = Client()
 
@@ -40,3 +44,17 @@ def get_current_weather() -> Weather:
         weather = Weather.HOT
 
     return weather
+
+
+async def create_transaction_in_db(
+    db: AsyncDatabase, transaction_data: TransactionCreate
+) -> None:
+    await db[settings.COLLECTION_NAME].insert_one(transaction_data.model_dump())
+
+
+async def get_transaction_in_db(db: AsyncDatabase, id: str) -> dict[str, Any]:
+    return await db[settings.COLLECTION_NAME].find_one({"_id": ObjectId(id)})
+
+
+async def get_all_transactions_in_db(db: AsyncDatabase) -> list[dict[str, Any]]:
+    return await db[settings.COLLECTION_NAME].find({}).to_list()

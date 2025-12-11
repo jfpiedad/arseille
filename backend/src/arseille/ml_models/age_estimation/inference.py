@@ -82,7 +82,7 @@ class AgeEstimator:
             padding = max(image.shape) * 5 / self.thickness_per_pixel
             padding = int(max(padding, 10))
 
-            bounding_box = self._padding_face(box=bounding_box)
+            bounding_box = self._padding_face(box=bounding_box, padding=padding)
 
             cropped_image = Image.fromarray(image).crop(bounding_box)
             cropped_image = self._transform(image=cropped_image)
