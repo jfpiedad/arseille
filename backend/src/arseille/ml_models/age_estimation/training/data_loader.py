@@ -14,7 +14,7 @@ class UTKFaceDataset(Dataset):
     The format is: `[age]_[gender]_[race]_[date&time]`.
     """
 
-    dataset_filenames: list[str]
+    dataset_filenames: list[Path]
 
     def __init__(self, directory: str | Path, transform: Compose | None = None) -> None:
         self.directory = Path(directory)
@@ -27,7 +27,7 @@ class UTKFaceDataset(Dataset):
     def __getitem__(self, index: int) -> tuple[ImageFile, int, int]:
         filename = self.dataset_filenames[index]
 
-        image_labels = filename.split("_")
+        image_labels = str(filename).split("_")
 
         actual_age = int(image_labels[0])
         age_label = self._age_to_class(actual_age)
@@ -68,6 +68,8 @@ class UTKFaceDataset(Dataset):
             if age_ranges[index] <= age <= age_ranges[index + 1]:
                 return index
 
+        return -1
+
 
 def get_dataloader(
     directory: str | Path,
@@ -102,9 +104,9 @@ def split_dataloader(
 ) -> tuple[DataLoader, DataLoader]:
     """Split training data for validation data by the given ratio"""
     training_ratio = 1 - validation_ratio
-    training_size = int(training_ratio * len(training_data.dataset))
+    training_size = int(training_ratio * len(training_data.dataset))  # ty: ignore[invalid-argument-type]
 
-    indices = list(range(len(training_data.dataset)))
+    indices = list(range(len(training_data.dataset)))  # ty: ignore[invalid-argument-type]
     training_indices = indices[:training_size]
     validation_indices = indices[training_size:]
 

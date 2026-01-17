@@ -17,7 +17,7 @@ def evaluate(
     validation_dataloader: DataLoader,
     device: torch.device,
     verbose: int = 0,
-) -> tuple[float, float, float, float, float]:
+) -> tuple[float, float, float]:
     # Loss function
     age_range_loss = nn.CrossEntropyLoss()
     age_estimation_loss = nn.L1Loss()
@@ -35,7 +35,7 @@ def evaluate(
         total_age_estimation_loss = 0
 
         if verbose == 1:
-            validation_dataloader = tqdm(
+            validation_dataloader = tqdm(  # ty: ignore[invalid-assignment], tqdm
                 validation_dataloader, desc="Evaluate: ", ncols=100
             )
 

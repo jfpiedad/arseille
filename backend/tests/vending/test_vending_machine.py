@@ -6,6 +6,7 @@ from arseille.vending.data import DetectionMetadata
 from arseille.vending.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine, VideoSource
+from tests.utils import DummyVendingMachine  # ty: ignore[unresolved-import]
 
 
 def test_video_source_invalid_camera_index() -> None:
@@ -28,7 +29,7 @@ def test_vending_machine_factory_creation() -> None:
 
 @pytest.mark.anyio
 async def test_vending_machine_invalid_mode(
-    dummy_vending_machine: VendingMachine,
+    dummy_vending_machine: DummyVendingMachine,
 ) -> None:
     with pytest.raises(InvalidVendingMode):
         dummy_vending_machine.set_mode(-1)
@@ -36,7 +37,7 @@ async def test_vending_machine_invalid_mode(
 
 @pytest.mark.anyio
 async def test_vending_machine_context_manager(
-    dummy_vending_machine: VendingMachine,
+    dummy_vending_machine: DummyVendingMachine,
 ) -> None:
     assert dummy_vending_machine._lock.locked() is False
 

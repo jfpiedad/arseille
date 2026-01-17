@@ -64,10 +64,10 @@ def unpack_vending_stream_data(data: bytes) -> tuple[int, MetadataDict, np.ndarr
 @lru_cache
 def create_dummy_vending_machine() -> VendingMachine:
     vm = DummyVendingMachine(
-        video_source=DummyVideoSource(),
-        face_detector=None,
-        age_estimator=DummyAgeEstimator(),
-        task_executor=TaskExecutor(executor=DummyExecutor()),
+        video_source=DummyVideoSource(),  # ty: ignore[invalid-argument-type]
+        face_detector=None,  # ty: ignore[invalid-argument-type]
+        age_estimator=DummyAgeEstimator(),  # ty: ignore[invalid-argument-type]
+        task_executor=TaskExecutor(executor=DummyExecutor()),  # ty: ignore[invalid-argument-type]
     )
 
     face_detector = DummyFaceDetector()
@@ -108,7 +108,7 @@ class DummyExecutor(Executor):
 
         return future
 
-    def shutdown(self, wait: bool = True) -> None:
+    def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
         self._shutdown = True
 
 
@@ -146,6 +146,7 @@ class DummyFaceDetector:
     detection result.
     """
 
+    callback: Callable[[DetectionResult, mediapipe.Image, int], None]
     # This variable is used to raise the exception WebSocketDisconnect during testing.
     # Since checkpoints is continouosly sending data to the browser, it has no way of
     # knowing if a close frame is sent from the browser. It relies on receive_bytes()
@@ -158,7 +159,7 @@ class DummyFaceDetector:
     _RAISE_WEBSOCKET_DISCONNECT = False
 
     def __init__(self) -> None:
-        self.callback = None
+        self.callback = None  # ty: ignore[invalid-assignment]
 
     def detect_async(
         self,

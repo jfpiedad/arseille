@@ -14,13 +14,13 @@ from arseille.ml_models.face_detection.utils import od_collate_fn
 
 
 class OpenImagesV7Dataset(Dataset):
-    dataset_filenames: list[str]
+    dataset_filenames: list[Path]
 
     def __init__(
         self,
         directory: str | Path,
         image_size: int,
-        transform: T.Compose | None = None,
+        transform: T.Compose,
         augment: A.Compose | None = None,
         is_training: bool = True,
     ) -> None:
@@ -44,13 +44,15 @@ class OpenImagesV7Dataset(Dataset):
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, np.ndarray]:
         image_path = self.images_directory / f"{self.dataset_filenames[index]}.jpg"
-        image = self._load_image(image_path)
+        image = self._load_image(str(image_path))
 
         rescale_output = self._resize_and_pad(image, target_size=self.image_size)
         image = rescale_output["image"]
 
         label_path = self.labels_directory / f"{self.dataset_filenames[index]}.txt"
-        label = self._read_and_convert_labels(label_path, rescale_output=rescale_output)
+        label = self._read_and_convert_labels(
+            str(label_path), rescale_output=rescale_output
+        )
 
         if self.augment is not None:
             augmented = self.augment(image=image, bboxes=label)

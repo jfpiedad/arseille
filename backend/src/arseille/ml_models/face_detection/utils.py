@@ -58,7 +58,7 @@ class MultiBoxLoss(nn.Module):
                 truth_boxes = targets[index][:, :-1].to(self.device)
                 truth_labels = targets[index][:, -1].to(self.device)
 
-                dbox = self.dbox_list.to(self.device)
+                dbox = self.dbox_list.to(self.device)  # ty: ignore[possibly-missing-attribute], Pytorch
                 variances = [0.1, 0.2]
 
                 match_boxes(

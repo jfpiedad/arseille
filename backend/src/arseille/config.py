@@ -61,4 +61,8 @@ class Settings(BaseSettings):
         return self.ROOT_DIRECTORY / "datasets" / "age_estimation"
 
 
-settings = Settings()
+settings = Settings()  # ty: ignore[missing-argument], Pydantic
+
+if __name__ == "__main__":
+    for key, val in settings:
+        print(f"{key}: {val}")

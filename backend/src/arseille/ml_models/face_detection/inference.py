@@ -23,7 +23,7 @@ def initialize_face_detector(
     if not model_asset_path.exists():
         raise FileNotFoundError(f"Path {model_asset_path} does not exist.")
 
-    base_options = BaseOptions(model_asset_path=model_asset_path)
+    base_options = BaseOptions(model_asset_path=str(model_asset_path))
     options = FaceDetectorOptions(
         base_options=base_options,
         running_mode=VisionTaskRunningMode.LIVE_STREAM,

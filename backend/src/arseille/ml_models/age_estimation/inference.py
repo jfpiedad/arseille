@@ -15,7 +15,7 @@ class AgeEstimator:
         self,
         weights_path: str | Path,
         face_size: int = 64,
-        thickness_per_pixel: int | None = 500,
+        thickness_per_pixel: int = 500,
     ) -> None:
         weights_path = Path(weights_path)
 
@@ -35,7 +35,9 @@ class AgeEstimator:
             torch.load(self.weights_path, map_location="cpu"), strict=False
         )
 
-    def predict_single(self, bounding_box: BoundingBox, image: np.ndarray) -> int:
+    def predict_single(
+        self, bounding_box: BoundingBox, image: np.ndarray
+    ) -> int | float:
         """
         Predicts age on single image given the bounding box. \n
         **For testing purposes only.**
@@ -54,8 +56,8 @@ class AgeEstimator:
         padding = max(image.shape) * 5 / self.thickness_per_pixel
         padding = int(max(padding, 10))
 
-        box = self._padding_face(box=box)
-        face = pil_image.crop(box)
+        box = self._padding_face(box=box)  # ty: ignore[invalid-argument-type]
+        face = pil_image.crop(box)  # ty: ignore[invalid-argument-type]
         transformed_face = self._transform(face)
 
         face_image = torch.unsqueeze(transformed_face, dim=0)
@@ -68,7 +70,7 @@ class AgeEstimator:
     def predict(self, face_detection_data: list[tuple[BoundingBox, np.ndarray]]) -> int:
         """Predicts age based on face detection data."""
 
-        cropped_images = []
+        images = []
 
         for bounding_box, image in face_detection_data:
             x1 = bounding_box.origin_x
@@ -79,17 +81,12 @@ class AgeEstimator:
             bounding_box = [x1, y1, x2, y2]
             bounding_box = np.clip(bounding_box, 0, np.inf).astype(np.uint32)
 
-            padding = max(image.shape) * 5 / self.thickness_per_pixel
-            padding = int(max(padding, 10))
+            image = Image.fromarray(image).crop(bounding_box)  # ty: ignore[invalid-argument-type]
+            image = self._transform(image=image)
 
-            bounding_box = self._padding_face(box=bounding_box, padding=padding)
+            images.append(image)
 
-            cropped_image = Image.fromarray(image).crop(bounding_box)
-            cropped_image = self._transform(image=cropped_image)
-
-            cropped_images.append(cropped_image)
-
-        cropped_images = torch.stack(cropped_images, dim=0)
+        cropped_images = torch.stack(images, dim=0)
 
         ages = self.model(cropped_images)
         ages = torch.round(ages).long()

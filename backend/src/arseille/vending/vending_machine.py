@@ -87,7 +87,7 @@ class VendingMachine:
     """
 
     _mode: VendingMode
-    _strategies: dict[VendingMode, BaseVMCheckpoint | VMFullSystem]
+    _strategies: dict[VendingMode, BaseVMCheckpoint]
 
     def __init__(
         self,
@@ -106,9 +106,9 @@ class VendingMachine:
 
         self._lock = asyncio.Lock()
         self._metadata_obj = DetectionMetadata()
-        self._mode = None
+        self._mode = None  # ty: ignore[invalid-assignment]
 
-        self._strategies = {
+        self.checkpoint_mapping = {
             VendingMode.CHECKPOINT_25: VMCheckpoint25(
                 metadata_obj=self._metadata_obj,
             ),
@@ -122,12 +122,13 @@ class VendingMachine:
                 age_estimator=self.age_estimator,
                 task_executor=self.task_executor,
             ),
-            VendingMode.FULL_SYSTEM: VMFullSystem(
-                camera_feed=self.video_source.read,
-                face_detector=None,
-                age_estimator=self.age_estimator,
-            ),
         }
+
+        self.full_system_handler = VMFullSystem(
+            camera_feed=self.video_source.read,
+            face_detector=None,  # ty: ignore[invalid-argument-type]
+            age_estimator=self.age_estimator,
+        )
 
     async def __aenter__(self) -> "VendingMachine":
         """Acquire the lock and return `self` upong entering the runtime context."""
@@ -144,9 +145,8 @@ class VendingMachine:
         - Reset values of the metadata object to `None`.
         - Release the lock.
         """
-        for mode, strategy in self._strategies.items():
-            if mode != VendingMode.FULL_SYSTEM:
-                strategy.recent_frames.clear()
+        if self._mode != VendingMode.FULL_SYSTEM:
+            self.checkpoint_mapping[self._mode].recent_frames.clear()
 
         self._metadata_obj.clear()
         self._lock.release()
@@ -156,7 +156,7 @@ class VendingMachine:
         """Creates the vending machine object with default configuration."""
         vm = cls(
             video_source=VideoSource(),
-            face_detector=None,
+            face_detector=None,  # ty: ignore[invalid-argument-type]
             age_estimator=AgeEstimator(
                 weights_path=settings.AGE_ESTIMATOR_WEIGHTS_PATH
             ),
@@ -189,7 +189,7 @@ class VendingMachine:
         Used in conjunction with `self.run` when vending machine is run with the mode
         full system.
         """
-        await self._strategies[self._mode].simulate(websocket=websocket, db=db)
+        await self.full_system_handler.simulate(websocket=websocket, db=db)
 
     async def run(self) -> AsyncGenerator[bytes, None]:
         """
@@ -198,13 +198,12 @@ class VendingMachine:
         Used in conjunction with `self.simulate` when vending machine is run with the
         mode full system.
         """
-        # Since the mapping of strategies is defined in the init method and face
-        # detector object is defined after creation of the VendingMachine class,
-        # we attach face detector before the full system mode runs.
-        if self._strategies[VendingMode.FULL_SYSTEM].face_detector is None:
-            self._strategies[VendingMode.FULL_SYSTEM].face_detector = self.face_detector
+        # Attach the face detector object on the full system handler just before running
+        # since face detector is attached on the `VendingMachine` class after creation
+        # and the handler is defined on its class creation.
+        self.full_system_handler.face_detector = self.face_detector
 
-        stream = self._strategies[VendingMode.FULL_SYSTEM].camera_stream()
+        stream = self.full_system_handler.camera_stream()
 
         async for image in stream:
             image_bytes = None
@@ -245,6 +244,15 @@ class VendingMachine:
         image = output_image.numpy_view()
         self._metadata_obj.timestamp = timestamp_ms
 
-        self._strategies[self._mode].process(
-            detection_result=detection_result, image=image, timestamp_ms=timestamp_ms
-        )
+        if self._mode == VendingMode.FULL_SYSTEM:
+            self.full_system_handler.process(
+                detection_result=detection_result,
+                image=image,
+                timestamp_ms=timestamp_ms,
+            )
+        else:
+            self.checkpoint_mapping[self._mode].process(
+                detection_result=detection_result,
+                image=image,
+                timestamp_ms=timestamp_ms,
+            )

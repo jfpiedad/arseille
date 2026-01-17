@@ -18,7 +18,10 @@ from arseille.vending.utils import (
     concatenate_image_and_metadata,
     sort_detection_results_desc,
 )
-from tests.utils import DummyExecutor, unpack_vending_stream_data
+from tests.utils import (  # ty: ignore[unresolved-import]
+    DummyExecutor,
+    unpack_vending_stream_data,
+)
 
 TEST_IMAGE_WIDTH = 693
 TEST_IMAGE_HEIGHT = 653

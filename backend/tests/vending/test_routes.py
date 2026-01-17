@@ -10,8 +10,14 @@ from pytest import FixtureRequest
 from respx import Route
 
 from arseille.vending.enums import Weather
-from tests.utils import DummyFaceDetector, unpack_vending_stream_data
-from tests.vending.test_utils import TEST_IMAGE_HEIGHT, TEST_IMAGE_WIDTH
+from tests.utils import (  # ty: ignore[unresolved-import]
+    DummyFaceDetector,
+    unpack_vending_stream_data,
+)
+from tests.vending.test_utils import (  # ty: ignore[unresolved-import]
+    TEST_IMAGE_HEIGHT,
+    TEST_IMAGE_WIDTH,
+)
 
 TEST_VENDING_MACHINE_STREAM_URL = "http://test/vending-machine/checkpoint"
 

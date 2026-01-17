@@ -21,7 +21,7 @@ def training(
     epochs: int = 10,
     dataset_directory: Path | None = None,
     learning_rate: float = 0.001,
-    patience: float = 10,
+    patience: int = 10,
     weights_path: Path | None = None,
     shuffle: bool = True,
     test: bool = False,
@@ -59,7 +59,7 @@ def training(
     face_detection_model = face_detection_model.to(device)
 
     if weights_path is None:
-        weights_path = settings.FACE_DETECTOR_WEIGHTS_PATH
+        weights_path = settings.FACE_DETECTOR_WEIGHTS_PATH_TRAINING
         weights_path.parent.mkdir(parents=True, exist_ok=True)
 
     anchors_path = settings.ROOT_DIRECTORY / "anchors.npy"

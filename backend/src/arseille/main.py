@@ -13,7 +13,7 @@ app = FastAPI(lifespan=lifespan, swagger_ui_parameters={"operationsSorter": "met
 
 
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # ty: ignore[invalid-argument-type], Fastapi
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],

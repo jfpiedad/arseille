@@ -53,7 +53,7 @@ async def create_transaction_in_db(
 
 
 async def get_transaction_in_db(db: AsyncDatabase, id: str) -> dict[str, Any]:
-    return await db[settings.COLLECTION_NAME].find_one({"_id": ObjectId(id)})
+    return await db[settings.COLLECTION_NAME].find_one({"_id": ObjectId(id)})  # ty: ignore[invalid-return-type]
 
 
 async def get_all_transactions_in_db(db: AsyncDatabase) -> list[dict[str, Any]]:

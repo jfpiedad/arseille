@@ -14,7 +14,7 @@ from arseille.vending.dependencies import get_vending_machine
 from arseille.vending.enums import VendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine
-from tests.utils import (
+from tests.utils import (  # ty: ignore[unresolved-import]
     DummyAgeEstimator,
     DummyExecutor,
     DummyFaceDetector,
@@ -81,7 +81,7 @@ def dummy_vending_machine(
 ) -> Generator[VendingMachine, None, None]:
     vm = VendingMachine(
         video_source=DummyVideoSource(),
-        face_detector=None,
+        face_detector=None,  # ty: ignore[invalid-argument-type]
         age_estimator=DummyAgeEstimator(),
         task_executor=TaskExecutor(executor=dummy_executor),
     )

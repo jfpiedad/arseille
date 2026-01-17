@@ -1,7 +1,6 @@
-import asyncio
 import json
 import struct
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any, Callable
 
 import cv2
@@ -141,7 +140,7 @@ class TaskExecutor:
     def add_task(
         self,
         task_fn: Callable[..., Any],
-        done_callback: Callable[[asyncio.Future], None],
+        done_callback: Callable[[Future], None],
         **kwargs,
     ) -> None:
         """

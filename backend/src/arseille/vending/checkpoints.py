@@ -137,8 +137,8 @@ class VMCheckpoint50(BaseVMCheckpoint):
                 self._age_estimation_task_in_progress = True
                 self._cancelled = False
 
-                self.task_executor.add_task(
-                    task_fn=self.age_estimator.predict,
+                self.task_executor.add_task(  # type: ignore[possibly-missing-attribute]
+                    task_fn=self.age_estimator.predict,  # type: ignore[possibly-missing-attribute]
                     done_callback=self._age_estimator_task_callback,
                     face_detection_data=list(self.recent_frames),
                 )
@@ -155,7 +155,7 @@ class VMCheckpoint50(BaseVMCheckpoint):
             self.metadata_obj.annotated_image = image
             self._reset()
 
-    def _is_submission_allowed(self) -> None:
+    def _is_submission_allowed(self) -> bool:
         """
         The submission of age estimator task to the executor is only allowed when:
 
@@ -181,13 +181,13 @@ class VMCheckpoint75(BaseVMCheckpoint):
                 self._age_estimation_task_in_progress = True
                 self._cancelled = False
 
-                self.task_executor.add_task(
-                    task_fn=self.age_estimator.predict,
+                self.task_executor.add_task(  # type: ignore[possibly-missing-attribute]
+                    task_fn=self.age_estimator.predict,  # type: ignore[possibly-missing-attribute]
                     done_callback=self._age_estimator_task_callback,
                     face_detection_data=list(self.recent_frames),
                 )
 
-                self.task_executor.add_task(
+                self.task_executor.add_task(  # type: ignore[possibly-missing-attribute]
                     task_fn=get_current_weather,
                     done_callback=self._weather_task_callback,
                 )
@@ -204,7 +204,7 @@ class VMCheckpoint75(BaseVMCheckpoint):
             self.metadata_obj.annotated_image = image
             self._reset()
 
-    def _is_submission_allowed(self) -> None:
+    def _is_submission_allowed(self) -> bool:
         """
         The submission of age estimator task and weather task to the executor is only
         allowed when:
@@ -251,8 +251,8 @@ class VMFullSystem:
         self.face_detector = face_detector
         self.age_estimator = age_estimator
 
-        self._image = None
-        self._websocket = None
+        self._image = None  # ty: ignore[invalid-assignment]
+        self._websocket = None  # ty: ignore[invalid-assignment]
         self._recent_frames = deque([], maxlen=FRAMES_LIMIT)
 
         # Flag indicating if the vending machine is currently in order process.
@@ -326,7 +326,7 @@ class VMFullSystem:
                 # Save transaction data to database. The time it takes to save the data
                 # will be used to mimic the time in preparing the drink.
                 # Note: TOO FAST!
-                transaction_data = TransactionCreate(**message.transaction_data)
+                transaction_data = TransactionCreate(**message.transaction_data)  # ty: ignore[invalid-argument-type]
                 await create_transaction_in_db(db=db, transaction_data=transaction_data)
 
                 await self._send(msg_type=OutboundInstruction.DRINK_READY)
