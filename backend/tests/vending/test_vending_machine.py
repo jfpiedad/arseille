@@ -3,6 +3,7 @@ from mediapipe.tasks.python.vision.face_detector import FaceDetector
 
 from arseille.ml_models.age_estimation.inference import AgeEstimator
 from arseille.vending.data import DetectionMetadata
+from arseille.vending.enums import VendingMode
 from arseille.vending.exceptions import InvalidCameraIndex, InvalidVendingMode
 from arseille.vending.utils import TaskExecutor
 from arseille.vending.vending_machine import VendingMachine, VideoSource
@@ -40,6 +41,7 @@ async def test_vending_machine_context_manager(
     dummy_vending_machine: DummyVendingMachine,
 ) -> None:
     assert dummy_vending_machine._lock.locked() is False
+    dummy_vending_machine.set_mode(VendingMode.CHECKPOINT_50)
 
     async with dummy_vending_machine as vm:
         assert vm._lock.locked() is True

@@ -176,6 +176,9 @@ class VendingMachine:
 
         self._mode = mode
 
+    def is_busy(self) -> bool:
+        return self._lock.locked()
+
     async def run_checkpoint(self) -> AsyncGenerator[DetectionMetadata, None]:
         """Entry point when running checkpoints."""
         async for image, timestamp_ms in self.video_source.read():
@@ -212,6 +215,7 @@ class VendingMachine:
                 encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
 
                 _, buffer = cv2.imencode(".jpg", img=image, params=encode_params)
+
                 image_bytes = buffer.tobytes()
 
             yield image_bytes

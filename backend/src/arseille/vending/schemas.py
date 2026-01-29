@@ -13,6 +13,7 @@ class ArseilleBase(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True,
         arbitrary_types_allowed=True,
+        use_enum_values=True,
     )
 
 

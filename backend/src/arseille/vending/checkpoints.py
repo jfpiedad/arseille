@@ -2,6 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from collections import deque
 from concurrent.futures import Future
+from time import perf_counter
 from typing import Any, AsyncGenerator, Callable
 
 import mediapipe
@@ -295,7 +296,7 @@ class VMFullSystem:
 
         async for message in self._receive():
             if message.type == InboundInstruction.START_ORDER:
-                # Message frotnend to wait while its processing the user.
+                # Message frontend to wait while its processing the user.
                 await self._send(msg_type=OutboundInstruction.PROCESSING_USER)
 
                 self._start_ordering = True
@@ -323,11 +324,14 @@ class VMFullSystem:
                 # Message frontend to wait while the drink is being prepared.
                 await self._send(msg_type=OutboundInstruction.PREPARING_DRINK)
 
-                # Save transaction data to database. The time it takes to save the data
-                # will be used to mimic the time in preparing the drink.
-                # Note: TOO FAST!
                 transaction_data = TransactionCreate(**message.transaction_data)  # ty: ignore[invalid-argument-type]
+
+                start = perf_counter()
                 await create_transaction_in_db(db=db, transaction_data=transaction_data)
+                time_taken = perf_counter() - start
+
+                # Guarantees a pause for 2 seconds if db operation is fast.
+                await asyncio.sleep(max(0, 2 - time_taken))
 
                 await self._send(msg_type=OutboundInstruction.DRINK_READY)
             elif message.type == InboundInstruction.TAKE_DRINK:
@@ -337,7 +341,9 @@ class VMFullSystem:
                 self._reset()
                 await self._send(msg_type=OutboundInstruction.RESET)
             else:
-                raise ValueError(f"Unknown message type {message.type}")
+                print(f"Unknown message type {message.type}")
+
+        self._reset()
 
     async def camera_stream(self) -> AsyncGenerator[mediapipe.Image, None]:
         """

@@ -5,12 +5,15 @@ from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect,
 from pymongo.asynchronous.database import AsyncDatabase
 
 from arseille.vending.dependencies import get_db, get_vending_machine
+from arseille.vending.enums import VendingMode
 from arseille.vending.schemas import Transaction
-from arseille.vending.services import get_all_transactions_in_db
+from arseille.vending.services import (
+    get_all_transactions_in_db,
+)
 from arseille.vending.utils import concatenate_image_and_metadata
 from arseille.vending.vending_machine import VendingMachine
 
-router = APIRouter()
+router = APIRouter(prefix="/vending-machine")
 
 
 @asynccontextmanager
@@ -40,7 +43,7 @@ async def ws_exception_handler(
         raise
 
 
-@router.websocket("/vending-machine/checkpoint")
+@router.websocket("/checkpoint")
 async def vending_machine_checkpoint(
     websocket: WebSocket,
     vending_machine: Annotated[VendingMachine, Depends(get_vending_machine)],
@@ -56,7 +59,7 @@ async def vending_machine_checkpoint(
                     await websocket.send_bytes(data=message)
 
 
-@router.websocket("/vending-machine/full-system")
+@router.websocket("/full-system")
 async def vending_machine(
     websocket: WebSocket,
     vending_machine: Annotated[VendingMachine, Depends(get_vending_machine)],
@@ -67,9 +70,10 @@ async def vending_machine(
             await vm.simulate(websocket=websocket, db=db)
 
 
-@router.websocket("/vending-machine/camera-stream")
+@router.websocket("/camera-stream")
 async def vending_machine_camera_stream(websocket: WebSocket) -> None:
     vm: VendingMachine = websocket.state.vending_machine
+    vm.set_mode(VendingMode.FULL_SYSTEM)
 
     async with ws_exception_handler(websocket=websocket, run_type="Camera Stream"):
         async for image in vm.run():

@@ -38,15 +38,15 @@ class VendingMode(Enum):
 
 
 class InboundInstruction(StrEnum):
-    START_ORDER = "START ORDER"
-    VEND = "VEND"
-    TAKE_DRINK = "TAKE DRINK"
-    CANCEL = "CANCEL"
+    START_ORDER = auto()
+    VEND = auto()
+    TAKE_DRINK = auto()
+    CANCEL = auto()
 
 
 class OutboundInstruction(StrEnum):
-    PROCESSING_USER = "PROCESSING USER"
-    DISPLAY_DRINKS = "DISPLAY DRINKS"
-    PREPARING_DRINK = "PREPARING DRINK"
-    DRINK_READY = "DRINK READY"
-    RESET = "RESET"
+    PROCESSING_USER = auto()
+    DISPLAY_DRINKS = auto()
+    PREPARING_DRINK = auto()
+    DRINK_READY = auto()
+    RESET = auto()

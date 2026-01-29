@@ -9,9 +9,15 @@ import eslintImportPlugin from "eslint-plugin-import";
 import reactX from "eslint-plugin-react-x";
 import reactDom from "eslint-plugin-react-dom";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import pluginRouter from "@tanstack/eslint-plugin-router";
 
 export default defineConfig([
-  globalIgnores(["dist", "**/shadcn/"]),
+  globalIgnores([
+    "dist",
+    "**/components/ui",
+    "**/components/mode-toggle.tsx",
+    "**/components/theme-provider.tsx",
+  ]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -26,6 +32,7 @@ export default defineConfig([
       reactDom.configs.recommended,
       eslintImportPlugin.flatConfigs.recommended,
       eslintImportPlugin.flatConfigs.typescript,
+      ...pluginRouter.configs["flat/recommended"],
     ],
     rules: {
       "import/no-unresolved": "error",
