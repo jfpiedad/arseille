@@ -87,7 +87,7 @@ class VendingMachine:
     """
 
     _mode: VendingMode
-    _strategies: dict[VendingMode, BaseVMCheckpoint]
+    checkpoint_mapping: dict[VendingMode, BaseVMCheckpoint]
 
     def __init__(
         self,
