@@ -45,7 +45,8 @@ const _render = (
               </EmptyDescription>
               <EmptyContent className="flex-row justify-center gap-2">
                 <Button variant="outline" onClick={reconnectFn}>
-                  Try Again <RefreshCwIcon />
+                  <span className="hidden sm:block">Try Again</span>{" "}
+                  <RefreshCwIcon />
                 </Button>
               </EmptyContent>
             </EmptyHeader>

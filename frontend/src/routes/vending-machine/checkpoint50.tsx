@@ -26,7 +26,7 @@ const Checkpoint50 = () => {
       mode="Checkpoint 50"
       modeDescription={
         <div className="flex flex-col">
-          <Badge variant="secondary" className="w-1/8 h-6 text-sm mb-2">
+          <Badge variant="secondary" className="w-30 text-sm h-6 mb-2">
             Description
           </Badge>
           Detects human faces, displays bounding boxes, and estimates the age of
@@ -35,7 +35,7 @@ const Checkpoint50 = () => {
       }
       vmData={
         <div className="flex flex-col w-full border-1 border-b-neutral-700 items-center justify-center">
-          <Field className="w-1/4">
+          <Field className="w-1/4 min-w-24">
             <FieldLabel htmlFor="age">Age</FieldLabel>
             <Input id="age" value={checkpointStreamData?.age ?? ""} disabled />
           </Field>

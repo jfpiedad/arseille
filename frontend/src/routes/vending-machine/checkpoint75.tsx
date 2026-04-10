@@ -25,18 +25,17 @@ const Checkpoint75 = () => {
       mode="Checkpoint 75"
       modeDescription={
         <div className="flex flex-col">
-          <Badge variant="secondary" className="w-1/8 h-6 text-sm mb-2">
+          <Badge variant="secondary" className="w-30 text-sm h-6 mb-2">
             Description
           </Badge>
           Detects human faces, displays bounding boxes, estimates the age of the
-          nearest detected face, and shows current weather data alongside the
-          results.
+          nearest detected face, and shows current weather data.
         </div>
       }
       vmData={
         <div className="flex flex-col w-full border-1 border-b-neutral-700 items-center justify-center">
           <FieldGroup className="items-center justify-center">
-            <Field className="w-1/4">
+            <Field className="w-1/4 min-w-24">
               <FieldLabel htmlFor="age">Age</FieldLabel>
               <Input
                 id="age"
@@ -44,7 +43,7 @@ const Checkpoint75 = () => {
                 disabled
               />
             </Field>
-            <Field className="w-1/4">
+            <Field className="w-1/4 min-w-24">
               <FieldLabel htmlFor="weather">Weather</FieldLabel>
               <Input
                 id="weather"

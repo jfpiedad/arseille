@@ -31,7 +31,7 @@ const Checkpoint25 = () => {
       mode="Checkpoint 25"
       modeDescription={
         <div className="flex flex-col">
-          <Badge variant="secondary" className="w-1/8 h-6 text-sm mb-2">
+          <Badge variant="secondary" className="w-30 text-sm h-6 mb-2">
             Description
           </Badge>
           Detects human faces in real time and highlights them with bounding

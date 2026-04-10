@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeftIcon, MonitorCogIcon, RefreshCwIcon } from "lucide-react";
+import { HouseIcon, MonitorCogIcon, RefreshCwIcon } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,16 @@ import {
 
 export const Navbar = () => {
   return (
-    <div className="flex flex-row items-center p-3">
-      <div className="flex-1">
+    <div className="flex flex-row items-center p-3 ml-7 mr-7">
+      <div className="flex-1 flex gap-3">
         <Button variant="outline" asChild>
           <Link to="/">
-            <ArrowLeftIcon />
-            Return
+            <HouseIcon />
           </Link>
         </Button>
-      </div>
-      <div className="flex-1 text-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="mr-5 w-40">
+            <Button variant="outline" className="w-40">
               <MonitorCogIcon />
               Select Mode
             </Button>
@@ -51,15 +48,15 @@ export const Navbar = () => {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" asChild className="ml-5 w-40">
+        <Button variant="outline" asChild className="w-40">
           <Link to="/vending-machine">
             <RefreshCwIcon />
             Reset
           </Link>
         </Button>
-      </div>
-      <div className="flex-1 text-end">
-        <ModeToggle />
+        <div className="ml-auto">
+          <ModeToggle />
+        </div>
       </div>
     </div>
   );
