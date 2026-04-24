@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldContent,
@@ -13,6 +14,7 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -142,6 +144,7 @@ const DisplayDrinks = ({
   simulationState: InboundMessage;
 }) => {
   const [selectedDrink, setSelectedDrink] = useState("");
+  const [showAllDrinks, setShowAllDrinks] = useState(false);
 
   return (
     <div className="flex flex-1">
@@ -155,16 +158,27 @@ const DisplayDrinks = ({
             <Badge variant="secondary" className="size-6 w-1/8">
               {simulationState.detectionData?.weather}
             </Badge>
+            <div className="ml-auto">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="show-all-drinks"
+                  name="show-all-drinks"
+                  onCheckedChange={(value) => setShowAllDrinks(!!value)}
+                />
+                <Label htmlFor="show-all-drinks">Show all drinks</Label>
+              </Field>
+            </div>
           </div>
         </FieldSet>
         <FieldSet>
-          <FieldLegend>Drinks Menu</FieldLegend>
+          {showAllDrinks && <FieldLegend>Drinks Menu</FieldLegend>}
           <RadioGroup
             className="capitalize"
             onValueChange={(value) => setSelectedDrink(value)}
           >
             <div className="grid grid-cols-3 gap-2">
               {simulationState.detectionData &&
+                showAllDrinks &&
                 _getDrinks(simulationState.detectionData).map((drink) => (
                   <FieldLabel htmlFor={drink} key={drink}>
                     <Field orientation="horizontal">
